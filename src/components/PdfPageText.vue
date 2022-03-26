@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { TextContent } from 'pdfjs-dist/types/src/display/api'
 import { PageViewport, PDFPageProxy } from 'pdfjs-dist'
+import { TextContent } from 'pdfjs-dist/types/src/display/api'
 import { computed } from '@vue/reactivity'
 
 const props = defineProps<{ viewport: PageViewport, page: PDFPageProxy }>()

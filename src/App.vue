@@ -9,6 +9,7 @@ import PdfDocument from './components/PdfDocument.vue'
 
 <template>
   <pdf-document
+    :zoom="1"
     worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
     src="/samples/compressed.tracemonkey-pldi-09.pdf"
   ></pdf-document>

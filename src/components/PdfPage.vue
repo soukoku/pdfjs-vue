@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from '@vue/reactivity'
-import { PageViewport, PDFPageProxy } from 'pdfjs-dist'
-import { onMounted, shallowRef, watch, ref } from 'vue'
+import { onMounted, watch, ref, computed } from 'vue'
+import { PDFPageProxy } from 'pdfjs-dist'
 
 const props = defineProps<{ zoom: number, pixelRatio: number, page: PDFPageProxy }>()
 const canvas = ref<HTMLCanvasElement | undefined>()
@@ -49,10 +48,6 @@ function renderPage() {
   page.render(renderContext)
 }
 
-// defineExpose({
-//   renderPage
-// })
-
 watch(() => [props.page, displayScale.value], () => {
   renderPage()
 }, { immediate: true })
@@ -63,13 +58,30 @@ onMounted(() => {
 
 </script>
 <template>
-  <div style="margin-bottom:1rem; display:flex; flex-direction: column;">
-    <div
-      style="position:relative; display:flex; user-select: none; outline: 1px solid #ddd; margin-bottom:.5rem; margin:auto;"
-    >
+  <div class="pdf-page">
+    <div class="pdf-page-layout">
       <canvas ref="canvas"></canvas>
       <slot :width="canvasAttrs.width" :height="canvasAttrs.height"></slot>
     </div>
-    <div style="text-align:center; line-height: 1.5;">{{ page.pageNumber }}</div>
+    <div class="pdf-page-number">{{ page.pageNumber }}</div>
   </div>
 </template>
+<style>
+.pdf-page {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.pdf-page-layout {
+  position: relative;
+  display: flex;
+  user-select: none;
+  outline: 1px solid #ddd;
+  margin-bottom: 0.5rem;
+  margin: auto;
+}
+.pdf-page-number {
+  text-align: center;
+  line-height: 1.5;
+}
+</style>

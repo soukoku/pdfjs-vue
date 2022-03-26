@@ -8,7 +8,7 @@ const props = defineProps<{ zoom: number, workerJs: string, src: string | URL | 
 const emits = defineEmits<{ (e: 'error', error: any): void }>()
 
 const pixelRatio = ref(window.devicePixelRatio)
-const pdfDoc = shallowRef<PDFDocumentProxy | null>(null)
+const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
 
 function cleanupDoc() {
@@ -17,7 +17,7 @@ function cleanupDoc() {
   const doc = pdfDoc.value
   if (doc) {
     doc.destroy()
-    pdfDoc.value = null
+    pdfDoc.value = undefined
   }
 }
 function updatePixelRatio() {
@@ -68,6 +68,7 @@ onBeforeUnmount(() => {
   <div>
     <pdf-page
       v-for="page in pdfPages"
+      :hide-text="false"
       :key="page.pageNumber"
       :page="page"
       :pixel-ratio="pixelRatio"

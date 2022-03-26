@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, watch, ref, computed } from 'vue'
 import { PDFPageProxy } from 'pdfjs-dist'
+import PdfPageText from './PdfPageText.vue'
 
-const props = defineProps<{ zoom: number, pixelRatio: number, page: PDFPageProxy }>()
+const props = defineProps<{ zoom: number, pixelRatio: number, hideText: boolean, page: PDFPageProxy }>()
 const canvas = ref<HTMLCanvasElement | undefined>()
 
 const pdfScale = computed(() => {
@@ -11,8 +12,14 @@ const pdfScale = computed(() => {
 const displayScale = computed(() => {
   return pdfScale.value * (props.pixelRatio || 1)
 })
+const pdfViewport = computed(() => {
+  return props.page.getViewport({ scale: pdfScale.value })
+})
+const displayViewport = computed(() => {
+  return props.page.getViewport({ scale: displayScale.value })
+})
 const canvasAttrs = computed(() => {
-  const vp = props.page.getViewport({ scale: pdfScale.value })
+  const vp = pdfViewport.value
 
   return {
     width: vp.width * displayScale.value,
@@ -43,7 +50,7 @@ function renderPage() {
   const renderContext = {
     canvasContext: context,
     transform: [displayScale.value, 0, 0, displayScale.value, 0, 0],
-    viewport: page.getViewport({ scale: displayScale.value })
+    viewport: displayViewport.value
   }
   page.render(renderContext)
 }
@@ -61,7 +68,10 @@ onMounted(() => {
   <div class="pdf-page">
     <div class="pdf-page-layout">
       <canvas ref="canvas"></canvas>
-      <slot :width="canvasAttrs.width" :height="canvasAttrs.height"></slot>
+      <div class="pdf-page-overlay">
+        <pdf-page-text v-if="!hideText" :viewport="pdfViewport" :page="page" />
+        <slot :width="canvasAttrs.width" :height="canvasAttrs.height"></slot>
+      </div>
     </div>
     <div class="pdf-page-number">{{ page.pageNumber }}</div>
   </div>
@@ -75,7 +85,6 @@ onMounted(() => {
 .pdf-page-layout {
   position: relative;
   display: flex;
-  user-select: none;
   outline: 1px solid #ddd;
   margin-bottom: 0.5rem;
   margin: auto;
@@ -83,5 +92,12 @@ onMounted(() => {
 .pdf-page-number {
   text-align: center;
   line-height: 1.5;
+}
+.pdf-page-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 </style>

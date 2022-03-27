@@ -28,7 +28,10 @@ function renderText() {
     renderTask.cancel()
     return
   }
-  el.innerHTML = ''
+  while (el.firstChild) {
+    el.removeChild(el.firstChild)
+  }
+
   renderTask = renderTextLayer({
     textContent: textContent.value,
     container: el,

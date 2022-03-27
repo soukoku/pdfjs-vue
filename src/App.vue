@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import PdfDocument from './components/PdfDocument.vue'
 
+const rootEl = ref()
 const zoomDelta = ref(0)
 const zooms = ref([{
   text: '200%',
@@ -26,6 +27,9 @@ const zooms = ref([{
 }, {
   text: '50%',
   delta: -.5
+}, {
+  text: '25%',
+  delta: -.75
 }])
 
 function onMouseWheel(e: WheelEvent) {
@@ -40,22 +44,50 @@ function onMouseWheel(e: WheelEvent) {
   }
 }
 function zoomIn() {
-  zoomDelta.value += .25
+  zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
 }
 function zoomOut() {
-  zoomDelta.value -= .25
+  zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
 }
+function printScroll() {
+  const root = rootEl.value as HTMLDivElement
+  console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
+}
+
+// watch(zoomDelta, (newDelta, oldDelta) => {
+//   const root = rootEl.value as HTMLDivElement
+//   if (root) {
+//     // try to keep current scroll posn after zoom change
+//     // just an idea, to be improved so it actually works
+//     const curTop = root.scrollTop
+//     const curLeft = root.scrollLeft
+//     const zoomIn = newDelta > oldDelta
+//     const change = Math.abs(newDelta - oldDelta)
+//     const ratio = zoomIn ? 1 / (1 - change) : (1 - change)
+//     console.log(`old scrolls ${curLeft}, ${curTop}, ${ratio}`)
+//     nextTick(() => {
+//       root.scrollTop = curTop * ratio
+//       root.scrollLeft = curLeft * ratio
+//       console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
+//     })
+//   }
+// })
 
 </script>
 
 <template>
-  <div @wheel="onMouseWheel">
-    <div style="position:fixed;z-index:1">
+  <div
+    ref="rootEl"
+    @wheel="onMouseWheel"
+    style="height:100vh;overflow:auto;padding:1rem;background:gainsboro;"
+  >
+    <div style="position:fixed;top:0;z-index:1">
       <button @click="zoomIn">Zoom in</button>
       <select v-model="zoomDelta">
         <option v-for="zoom in zooms" :value="zoom.delta">{{ zoom.text }}</option>
       </select>
       <button @click="zoomOut">Zoom out</button>
+      <button @click="printScroll">test</button>
     </div>
     <pdf-document
       :zoom="1 + zoomDelta"

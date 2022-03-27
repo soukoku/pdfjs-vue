@@ -27,7 +27,7 @@ const maxAutoWidth = 1100
 defineExpose({ rootEl, inViewport })
 
 // convert pdf dpi (72) to base screen dpi (96)
-const baseScale = 96 / 72 
+const baseScale = 96 / 72
 
 const pdfScale = computed(() => {
   const { width: pageWidth, height: pageHeight } = props.page.getViewport({ scale: baseScale })
@@ -83,12 +83,13 @@ function renderPage() {
   const pdfVP = pdfViewport.value
   const dispVP = displayViewport.value
 
-  canvas.value.width = Math.ceil(dispVP.width)
-  canvas.value.height = Math.ceil(dispVP.height)
-  canvas.value.style.width = Math.floor(pdfVP.width) + 'px'
-  canvas.value.style.height = Math.floor(pdfVP.height) + 'px'
+  const canvasEl = canvas.value
+  canvasEl.width = Math.ceil(dispVP.width)
+  canvasEl.height = Math.ceil(dispVP.height)
+  canvasEl.style.width = Math.floor(pdfVP.width) + 'px'
+  canvasEl.style.height = Math.floor(pdfVP.height) + 'px'
 
-  const context = canvas.value.getContext('2d')
+  const context = canvasEl.getContext('2d')
   if (!context || !inViewport.value) return
   if (renderTask) {
     renderTask.cancel()
@@ -130,7 +131,7 @@ onBeforeUnmount(() => {
     <div class="pdf-page-layout">
       <canvas ref="canvas"></canvas>
       <div class="pdf-page-overlay">
-        <pdf-page-text v-if="!hideText" :viewport="pdfViewport" :page="page" />
+        <pdf-page-text v-if="!hideText" :viewport="displayViewport" :page="page" />
         <slot :width="pdfViewport.width" :height="pdfViewport.height"></slot>
       </div>
     </div>

@@ -30,7 +30,6 @@ function onMouseWheel(e: WheelEvent) {
 }
 function onKeydown(e: KeyboardEvent) {
   if (e.ctrlKey) {
-    console.log('ctrl', e)
     if (e.key === '0' || e.which == 48) {
       // ctrl+0 resets
       emits('update:zoomType', ZoomType.Auto)
@@ -39,10 +38,10 @@ function onKeydown(e: KeyboardEvent) {
 }
 const viewport = ref({ width: 0, height: 0 })
 
-function printScroll() {
-  const root = rootEl.value as HTMLDivElement
-  console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
-}
+// function printScroll() {
+//   const root = rootEl.value as HTMLDivElement
+//   console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
+// }
 function updateViewport() {
   const root = rootEl.value
   if (root) {

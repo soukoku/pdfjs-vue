@@ -103,6 +103,7 @@ onBeforeUnmount(() => {
       :hide-text="hideText"
       :zoom-type="zoomType"
       :zoom="zoom"
+      @update:zoom="emits('update:zoom', $event)"
       :observer="observer"
       :viewport="viewport"
     >

@@ -115,7 +115,8 @@ onBeforeUnmount(() => {
       :hide-number="!!hideNumber"
       :hide-text="!!hideText"
       :zoom-type="zoomType || ZoomType.Auto"
-      v-model:zoom="zoom"
+      :zoom="zoom"
+      @update:zoom="emits('update:zoom', $event)"
     >
       <template #default="{ doc, page, width, height }">
         <slot name="page" :doc="doc" :page="page" :width="width" :height="height"></slot>

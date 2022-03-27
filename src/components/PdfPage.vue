@@ -3,7 +3,6 @@ import { onMounted, watch, ref, computed, onBeforeUnmount, defineExpose } from '
 import { PDFPageProxy, RenderTask } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
 import { ZoomType } from '../types'
-import { emit } from 'process'
 
 const props = defineProps<{
   zoom: number,
@@ -71,7 +70,7 @@ const displayViewport = computed(() => {
 
 watch(pdfScale, newScale => {
   emits('update:zoom', newScale / baseScale)
-})
+}, { immediate: true })
 
 let renderTask: RenderTask | undefined
 
@@ -83,10 +82,10 @@ function renderPage() {
   const pdfVP = pdfViewport.value
   const dispVP = displayViewport.value
 
-  canvas.value.width = dispVP.width
-  canvas.value.height = dispVP.height
-  canvas.value.style.width = pdfVP.width + 'px'
-  canvas.value.style.height = pdfVP.height + 'px'
+  canvas.value.width = Math.ceil(dispVP.width)
+  canvas.value.height = Math.ceil(dispVP.height)
+  canvas.value.style.width = Math.floor(pdfVP.width) + 'px'
+  canvas.value.style.height = Math.floor(pdfVP.height) + 'px'
 
   const context = canvas.value.getContext('2d')
   if (!context || !inViewport.value) return

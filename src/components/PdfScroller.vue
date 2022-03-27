@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { emit } from 'process'
-import { ref, watch, nextTick, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ZoomType } from '../types'
 
 const props = defineProps<{
@@ -29,6 +28,15 @@ function onMouseWheel(e: WheelEvent) {
     }
   }
 }
+function onKeydown(e: KeyboardEvent) {
+  if (e.ctrlKey) {
+    console.log('ctrl', e)
+    if (e.key === '0' || e.which == 48) {
+      // ctrl+0 resets
+      emits('update:zoomType', ZoomType.Auto)
+    }
+  }
+}
 const viewport = ref({ width: 0, height: 0 })
 
 function printScroll() {
@@ -44,14 +52,19 @@ function updateViewport() {
     }
   }
 }
+function fitZoom(zoom: number) {
+  // fit zoom to increments of .25
+  const overage = zoom % .25
+  return Number((zoom - overage).toFixed(2))
+}
 function zoomIn() {
-  const proposed = props.zoom + .25
+  const proposed = fitZoom(props.zoom + .25)
   emits('update:zoom', Math.min(proposed, 2))
   emits('update:zoomType', ZoomType.Custom)
   // zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
 }
 function zoomOut() {
-  const proposed = props.zoom - .25
+  const proposed = fitZoom(props.zoom - .25)
   emits('update:zoom', Math.max(proposed, .25))
   emits('update:zoomType', ZoomType.Custom)
   // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
@@ -86,6 +99,8 @@ onBeforeUnmount(() => {
   <div
     ref="rootEl"
     @wheel="onMouseWheel"
+    @keydown="onKeydown"
+    tabindex="0"
     style="height:100%;overflow:auto;padding:1rem 0;background:gainsboro;"
   >
     <slot :viewport="viewport"></slot>

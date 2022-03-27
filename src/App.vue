@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref, watch, nextTick, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref } from 'vue'
 import PdfDocument from './components/PdfDocument.vue'
 import PdfScroller from './components/PdfScroller.vue'
 import { ZoomType } from './types'
@@ -62,6 +62,10 @@ function changeZoom(e: Event) {
     }
   }
 }
+// watch(zoom,newZoom=>{
+//   const hit = zooms.value.findIndex(z=>z.value===newZoom)
+//   if()
+// })
 
 </script>
 

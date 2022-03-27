@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch, ref, computed, onBeforeUnmount, defineExpose } from 'vue'
-import { PDFPageProxy } from 'pdfjs-dist'
+import { PDFPageProxy, RenderTask } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
 
 const props = defineProps<{ zoom: number, pixelRatio: number, hideText: boolean, page: PDFPageProxy, observer: IntersectionObserver | undefined }>()
@@ -23,6 +23,8 @@ const displayViewport = computed(() => {
   return props.page.getViewport({ scale: displayScale.value })
 })
 
+let renderTask: RenderTask | undefined
+
 function renderPage() {
   if (!props.page || !canvas.value) return
 
@@ -38,6 +40,10 @@ function renderPage() {
 
   const context = canvas.value.getContext('2d')
   if (!context || !inViewport.value) return
+  if (renderTask) {
+    renderTask.cancel()
+    return
+  }
 
   console.debug(`rendering page ${page.pageNumber}`)
 
@@ -45,7 +51,13 @@ function renderPage() {
     canvasContext: context,
     viewport: displayViewport.value
   }
-  page.render(renderContext)
+  renderTask = page.render(renderContext)
+  renderTask.promise
+    .then(() => renderTask = undefined)
+    .catch(() => {
+      renderTask = undefined
+      renderPage()
+    })
 }
 
 watch(() => [props.page, displayScale.value, inViewport.value], () => {

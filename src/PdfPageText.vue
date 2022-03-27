@@ -36,7 +36,7 @@ function renderText() {
     textContent: textContent.value,
     container: el,
     viewport: vp,
-    // enhanceTextSelection: true
+    enhanceTextSelection: true
   })
   renderTask.promise.then(() => {
     renderTask = undefined
@@ -116,7 +116,7 @@ from https://github.com/mozilla/pdf.js/blob/v2.13.216/web/text_layer_builder.css
 }
 
 .pdf-text-layer ::selection {
-  background: rgba(0, 0, 255, 1);
+  background: rgb(0, 153, 255);
 }
 
 /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */

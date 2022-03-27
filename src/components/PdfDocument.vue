@@ -2,6 +2,7 @@
 import { ref, watch, shallowRef, onMounted, onBeforeUnmount } from 'vue'
 import { GlobalWorkerOptions, getDocument, PDFDataRangeTransport, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import { TypedArray, DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
+import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
 
 const props = defineProps<{ zoom: number, workerJs: string, src: string | URL | PDFDataRangeTransport | TypedArray | DocumentInitParameters }>()
@@ -10,7 +11,13 @@ const emits = defineEmits<{ (e: 'error', error: any): void }>()
 const pixelRatio = ref(window.devicePixelRatio)
 const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
+const observer = shallowRef<IntersectionObserver>()
+const rootEl = ref()
+const pageComps = ref<any[]>([])
 
+function setPageComp(component: any) {
+  pageComps.value.push(component)
+}
 function cleanupDoc() {
   pdfPages.value.forEach(pg => pg.cleanup())
   pdfPages.value = []
@@ -21,6 +28,7 @@ function cleanupDoc() {
   }
 }
 function updatePixelRatio() {
+  console.debug(`new pixel ratio=${window.devicePixelRatio}`)
   pixelRatio.value = window.devicePixelRatio
 }
 
@@ -51,28 +59,42 @@ watch(() => props.src, src => {
     })
 }, { immediate: true })
 
-
 // listen for dpi change
 const mediaQuery = matchMedia(`(resolution: 1dppx)`)
 onMounted(() => {
   mediaQuery.addEventListener("change", updatePixelRatio)
+  observer.value = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const foundComp = pageComps.value.find(comp => comp?.rootEl === entry.target)
+        if (foundComp) {
+          foundComp.inViewport = true
+        }
+      }
+    })
+  }, 50), {
+    // root: rootEl.value,
+    rootMargin: '0px'
+  })
 })
 onBeforeUnmount(() => {
   mediaQuery.removeEventListener("change", updatePixelRatio)
   cleanupDoc()
+  observer.value?.disconnect()
 })
-
 </script>
 
 <template>
-  <div>
+  <div ref="rootEl">
     <pdf-page
       v-for="page in pdfPages"
+      :ref="setPageComp"
       :hide-text="false"
       :key="page.pageNumber"
       :page="page"
-      :pixel-ratio="pixelRatio"
+      :pixelRatio="pixelRatio"
       :zoom="zoom || 1"
+      :observer="observer"
     >
       <template #default="{ width, height }">
         <slot :page="page.pageNumber" :width="width" :height="height"></slot>

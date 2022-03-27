@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { onMounted, watch, ref, computed } from 'vue'
+import { onMounted, watch, ref, computed, onBeforeUnmount, defineExpose } from 'vue'
 import { PDFPageProxy } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
 
-const props = defineProps<{ zoom: number, pixelRatio: number, hideText: boolean, page: PDFPageProxy }>()
+const props = defineProps<{ zoom: number, pixelRatio: number, hideText: boolean, page: PDFPageProxy, observer: IntersectionObserver | undefined }>()
 const canvas = ref<HTMLCanvasElement | undefined>()
+const rootEl = ref()
+const inViewport = ref(false)
+
+defineExpose({ rootEl, inViewport })
 
 const pdfScale = computed(() => {
   return props.zoom * (96 / 72)
@@ -18,59 +22,54 @@ const pdfViewport = computed(() => {
 const displayViewport = computed(() => {
   return props.page.getViewport({ scale: displayScale.value })
 })
-const canvasAttrs = computed(() => {
-  const vp = pdfViewport.value
-
-  return {
-    width: vp.width * displayScale.value,
-    height: vp.height * displayScale.value,
-    style: {
-      width: vp.width,
-      height: vp.height
-    }
-  }
-})
 
 function renderPage() {
   if (!props.page || !canvas.value) return
 
   const page = props.page
 
-  console.log(`rendering page ${page.pageNumber}`)
+  const pdfVP = pdfViewport.value
+  const dispVP = displayViewport.value
 
-  const sizes = canvasAttrs.value
-  canvas.value.width = sizes.width
-  canvas.value.height = sizes.height
-  canvas.value.style.width = sizes.style.width + 'px'
-  canvas.value.style.height = sizes.style.height + 'px'
+  canvas.value.width = dispVP.width
+  canvas.value.height = dispVP.height
+  canvas.value.style.width = pdfVP.width + 'px'
+  canvas.value.style.height = pdfVP.height + 'px'
 
   const context = canvas.value.getContext('2d')
-  if (!context) return
+  if (!context || !inViewport.value) return
+
+  console.debug(`rendering page ${page.pageNumber}`)
 
   const renderContext = {
     canvasContext: context,
-    transform: [displayScale.value, 0, 0, displayScale.value, 0, 0],
     viewport: displayViewport.value
   }
   page.render(renderContext)
 }
 
-watch(() => [props.page, displayScale.value], () => {
+watch(() => [props.page, displayScale.value, inViewport.value], () => {
   renderPage()
 }, { immediate: true })
-
+watch(() => props.pixelRatio, ratio => {
+  console.debug('page pixel ratio changed to ' + ratio)
+})
 onMounted(() => {
   renderPage()
+  props.observer?.observe(rootEl.value)
+})
+onBeforeUnmount(() => {
+  props.observer?.unobserve(rootEl.value)
 })
 
 </script>
 <template>
-  <div class="pdf-page">
+  <div ref="rootEl" class="pdf-page">
     <div class="pdf-page-layout">
       <canvas ref="canvas"></canvas>
       <div class="pdf-page-overlay">
         <pdf-page-text v-if="!hideText" :viewport="pdfViewport" :page="page" />
-        <slot :width="canvasAttrs.width" :height="canvasAttrs.height"></slot>
+        <slot :width="pdfViewport.width" :height="pdfViewport.height"></slot>
       </div>
     </div>
     <div class="pdf-page-number">{{ page.pageNumber }}</div>

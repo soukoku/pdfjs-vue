@@ -2,10 +2,12 @@
 import { onMounted, watch, ref, computed, onBeforeUnmount, defineExpose } from 'vue'
 import { PDFPageProxy, RenderTask } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
+import { ZoomType } from '../types'
+import { emit } from 'process'
 
 const props = defineProps<{
-  zoom: number | string,
-  pixelRatio: number,
+  zoom: number,
+  zoomType: ZoomType,
   hideText?: boolean,
   hideNumber?: boolean,
   viewport: {
@@ -15,6 +17,9 @@ const props = defineProps<{
   page: PDFPageProxy,
   observer: IntersectionObserver | undefined
 }>()
+const emits = defineEmits<{
+  (e: 'update:zoom', zoom: number): void
+}>()
 const canvas = ref<HTMLCanvasElement>()
 const rootEl = ref<HTMLDivElement>()
 const inViewport = ref(false)
@@ -22,32 +27,50 @@ const maxAutoWidth = 1100
 
 defineExpose({ rootEl, inViewport })
 
+const baseScale = 96 / 72
+
 const pdfScale = computed(() => {
-  let scale = (96 / 72)
-  if (typeof props.zoom === 'string') {
-    // if (props.zoom === 'height') {
-    //   // max height of rootEl
-    //   const hLimit = root.offsetHeight
-    // } else {
-    // max width of rootEl
-    const wLimit = Math.min(props.viewport.width, maxAutoWidth) - 40 // minus scroll bar & some space
-    const { width: pdfWidth } = props.page.getViewport({ scale })
-    console.log('wLimit=' + wLimit + ', pdfWidth=' + pdfWidth)
-    scale *= (wLimit / pdfWidth)
-    // }
-  } else {
-    scale *= props.zoom
+  const { width: pageWidth, height: pageHeight } = props.page.getViewport({ scale: baseScale })
+  const { width: vpWidth, height: vpHeight } = props.viewport
+  let wLimit = 0
+  let newZoom = 1
+  switch (props.zoomType) {
+    case ZoomType.Auto:
+      // minus 40 for scroll bar & some space
+      wLimit = Math.min(vpWidth, maxAutoWidth) - 40
+      newZoom = (wLimit / pageWidth)
+      return baseScale * newZoom
+    case ZoomType.WidthFit:
+      wLimit = vpWidth - 40
+      newZoom = (wLimit / pageWidth)
+      return baseScale * newZoom
+    case ZoomType.PageFit:
+      if (vpWidth > vpHeight) {
+        // fit height
+        newZoom = (vpHeight / pageHeight)
+        return baseScale * newZoom
+      } else {
+        // fit width
+        wLimit = vpWidth - 40
+        newZoom = (wLimit / pageWidth)
+        return baseScale * newZoom
+      }
   }
-  return scale
+  // exact zoom number
+  return baseScale * props.zoom
 })
 const displayScale = computed(() => {
-  return pdfScale.value * (props.pixelRatio || 1)
+  return pdfScale.value * (window?.devicePixelRatio || 1)
 })
 const pdfViewport = computed(() => {
   return props.page.getViewport({ scale: pdfScale.value })
 })
 const displayViewport = computed(() => {
   return props.page.getViewport({ scale: displayScale.value })
+})
+
+watch(pdfScale, newScale => {
+  emits('update:zoom', newScale / baseScale)
 })
 
 let renderTask: RenderTask | undefined
@@ -90,9 +113,7 @@ function renderPage() {
 watch(() => [props.page, displayScale.value, inViewport.value], () => {
   renderPage()
 }, { immediate: true })
-watch(() => props.pixelRatio, ratio => {
-  console.debug('page pixel ratio changed to ' + ratio)
-})
+
 onMounted(() => {
   renderPage()
   if (rootEl.value)

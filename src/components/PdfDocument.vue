@@ -4,11 +4,13 @@ import { GlobalWorkerOptions, getDocument, PDFDataRangeTransport, PDFDocumentPro
 import { TypedArray, DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
 import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
+import { ZoomType } from '../types'
 
 const props = defineProps<{
   hideText?: boolean,
   hideNumber?: boolean,
-  zoom: number | string,
+  zoomType: ZoomType,
+  zoom: number,
   workerJs: string,
   viewport: {
     width: number,
@@ -16,9 +18,12 @@ const props = defineProps<{
   },
   src: string | URL | PDFDataRangeTransport | TypedArray | DocumentInitParameters
 }>()
-const emits = defineEmits<{ (e: 'error', error: any): void }>()
+const emits = defineEmits<{
+  (e: 'error', error: any): void,
+  (e: 'update:zoom', zoom: number): void
+}>()
 
-const pixelRatio = ref(window.devicePixelRatio)
+// const pixelRatio = ref(window.devicePixelRatio)
 const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
 const observer = shallowRef<IntersectionObserver>()
@@ -37,10 +42,10 @@ function cleanupDoc() {
     pdfDoc.value = undefined
   }
 }
-function updatePixelRatio() {
-  console.debug(`new pixel ratio=${window.devicePixelRatio}`)
-  pixelRatio.value = window.devicePixelRatio
-}
+// function updatePixelRatio() {
+//   console.debug(`new pixel ratio=${window.devicePixelRatio}`)
+//   pixelRatio.value = window.devicePixelRatio
+// }
 
 
 watch(() => props.src, src => {
@@ -70,9 +75,9 @@ watch(() => props.src, src => {
 }, { immediate: true })
 
 // listen for dpi change
-const mediaQuery = matchMedia(`(resolution: 1dppx)`)
+// const mediaQuery = matchMedia(`(resolution: 1dppx)`)
 onMounted(() => {
-  mediaQuery.addEventListener("change", updatePixelRatio)
+  // mediaQuery.addEventListener("change", updatePixelRatio)
   observer.value = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -88,7 +93,7 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  mediaQuery.removeEventListener("change", updatePixelRatio)
+  // mediaQuery.removeEventListener("change", updatePixelRatio)
   cleanupDoc()
   observer.value?.disconnect()
 })
@@ -103,13 +108,14 @@ onBeforeUnmount(() => {
       :page="page"
       :hide-number="hideNumber"
       :hide-text="hideText"
-      :pixelRatio="pixelRatio"
+      :zoom-type="zoomType"
       :zoom="zoom"
+      @update:zoom="emits('update:zoom', $event)"
       :observer="observer"
       :viewport="viewport"
     >
       <template #default="{ width, height }">
-        <slot :page="page.pageNumber" :width="width" :height="height"></slot>
+        <slot :page="page" :width="width" :height="height"></slot>
       </template>
     </pdf-page>
   </div>

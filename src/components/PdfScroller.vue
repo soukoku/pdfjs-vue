@@ -1,0 +1,93 @@
+<script setup lang="ts">
+import { emit } from 'process'
+import { ref, watch, nextTick, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ZoomType } from '../types'
+
+const props = defineProps<{
+  zoomType?: ZoomType
+  zoom: number
+}>()
+const emits = defineEmits<{
+  (e: 'update:zoom', zoom: number): void
+  (e: 'update:zoomType', zoomType: ZoomType): void
+}>()
+const rootEl = ref()
+
+defineExpose({
+  zoomIn,
+  zoomOut
+})
+
+function onMouseWheel(e: WheelEvent) {
+  if (e.ctrlKey) {
+    e.preventDefault()
+    if (e.deltaY < 0) {
+      // make scroll up zoom in
+      zoomIn()
+    } else {
+      zoomOut()
+    }
+  }
+}
+const viewport = ref({ width: 0, height: 0 })
+
+function printScroll() {
+  const root = rootEl.value as HTMLDivElement
+  console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
+}
+function updateViewport() {
+  const root = rootEl.value
+  if (root) {
+    viewport.value = {
+      width: root.offsetWidth,
+      height: root.offsetHeight
+    }
+  }
+}
+function zoomIn() {
+  const proposed = props.zoom + .25
+  emits('update:zoom', Math.min(proposed, 2))
+  emits('update:zoomType', ZoomType.Custom)
+  // zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
+}
+function zoomOut() {
+  const proposed = props.zoom - .25
+  emits('update:zoom', Math.max(proposed, .25))
+  emits('update:zoomType', ZoomType.Custom)
+  // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
+}
+// watch(zoomDelta, (newDelta, oldDelta) => {
+//   const root = rootEl.value as HTMLDivElement
+//   if (root) {
+//     // try to keep current scroll posn after zoom change
+//     // just an idea, to be improved so it actually works
+//     const curTop = root.scrollTop
+//     const curLeft = root.scrollLeft
+//     const zoomIn = newDelta > oldDelta
+//     const change = Math.abs(newDelta - oldDelta)
+//     const ratio = zoomIn ? 1 / (1 - change) : (1 - change)
+//     console.log(`old scrolls ${curLeft}, ${curTop}, ${ratio}`)
+//     nextTick(() => {
+//       root.scrollTop = curTop * ratio
+//       root.scrollLeft = curLeft * ratio
+//       console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
+//     })
+//   }
+// })
+onMounted(() => {
+  window.addEventListener('resize', updateViewport)
+  updateViewport()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateViewport)
+})
+</script>
+<template>
+  <div
+    ref="rootEl"
+    @wheel="onMouseWheel"
+    style="height:100%;overflow:auto;padding:1rem 0;background:gainsboro;"
+  >
+    <slot :viewport="viewport"></slot>
+  </div>
+</template>

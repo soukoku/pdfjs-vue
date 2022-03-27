@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { GlobalWorkerOptions } from 'pdfjs-dist'
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { PdfSource, ZoomType } from '../types'
+import { PdfSource, ZoomType } from './types'
 import PdfDocument from './PdfDocument.vue'
+import debounce from 'lodash/debounce'
 
 const props = defineProps<{
-  zoomType?: ZoomType
-  zoom: number,
   workerJs: string,
-  sources: PdfSource[]
+  sources: PdfSource[],
+  zoomType?: ZoomType,
+  zoom: number,
+  hideText?: boolean,
+  hideNumber?: boolean,
 }>()
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
@@ -50,7 +53,7 @@ const viewport = ref({ width: 0, height: 0 })
 //   const root = rootEl.value as HTMLDivElement
 //   console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
 // }
-function updateViewport() {
+const updateViewport = debounce(() => {
   const root = rootEl.value
   if (root) {
     viewport.value = {
@@ -58,20 +61,21 @@ function updateViewport() {
       height: root.offsetHeight
     }
   }
-}
+}, 100)
+
 function fitZoom(zoom: number) {
   // fit zoom to increments of .25
   const overage = zoom % .25
   return Number((zoom - overage).toFixed(2))
 }
 function zoomIn() {
-  const proposed = fitZoom(props.zoom + .25)
+  const proposed = fitZoom((props.zoom || 1) + .25)
   emits('update:zoom', Math.min(proposed, 2))
   emits('update:zoomType', ZoomType.Custom)
   // zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
 }
 function zoomOut() {
-  const proposed = fitZoom(props.zoom - .25)
+  const proposed = fitZoom((props.zoom || 1) - .25)
   emits('update:zoom', Math.max(proposed, .25))
   emits('update:zoomType', ZoomType.Custom)
   // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
@@ -107,9 +111,11 @@ onBeforeUnmount(() => {
     <pdf-document
       v-for="src in sources"
       :viewport="viewport"
+      :src="src"
+      :hide-number="!!hideNumber"
+      :hide-text="!!hideText"
       :zoom-type="zoomType || ZoomType.Auto"
       v-model:zoom="zoom"
-      :src="src"
     >
       <template #default="{ doc, page, width, height }">
         <slot name="page" :doc="doc" :page="page" :width="width" :height="height"></slot>

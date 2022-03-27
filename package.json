@@ -1,12 +1,13 @@
 {
   "name": "pdfjs-vue",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Using pdfjs to display PDFs as a vue 3 component.",
   "files": [
     "dist/pdfjs*",
-    "dist/style*"
+    "dist/style*",
+    "dist/index.d.ts"
   ],
+  "types": "./dist/index.d.ts",
   "main": "./dist/pdfjs-vue.umd.js",
   "module": "./dist/pdfjs-vue.es.js",
   "exports": {
@@ -17,7 +18,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build && vue-tsc",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { PageViewport, PDFPageProxy, renderTextLayer } from 'pdfjs-dist'
+import type { TextContent } from 'pdfjs-dist/types/src/display/api'
 
-const props = defineProps<{ viewport: PageViewport, page: PDFPageProxy }>()
-const textContent = ref()
+const props = defineProps<{
+  viewport: PageViewport,
+  page: PDFPageProxy
+}>()
+const textContent = ref<TextContent>()
 const rootEl = ref<HTMLDivElement>()
 
 watch(() => props.page, async page => {
@@ -24,7 +28,7 @@ function renderText() {
     renderTask.cancel()
     return
   }
-  
+  el.innerHTML = ''
   renderTask = renderTextLayer({
     textContent: textContent.value,
     container: el,
@@ -35,6 +39,8 @@ function renderText() {
     renderTask = undefined
   }).catch(() => {
     renderTask = undefined
+  }).finally(() => {
+    // console.log(`page ${props.page.pageNumber} has ${el.getElementsByTagName('span').length} spans`)
   })
 }
 

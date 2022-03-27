@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, watch, ref, computed, onBeforeUnmount, defineExpose } from 'vue'
+import { onMounted, watch, ref, computed, onBeforeUnmount } from 'vue'
 import { PDFPageProxy, RenderTask } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
-import { ZoomType } from '../types'
+import { ZoomType } from './types'
 
 const props = defineProps<{
   zoom: number,
   zoomType: ZoomType,
-  hideText?: boolean,
-  hideNumber?: boolean,
+  hideText: boolean,
+  hideNumber: boolean,
   viewport: {
     width: number,
     height: number

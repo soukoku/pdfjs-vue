@@ -3,11 +3,11 @@ import { ref, watch, shallowRef, onMounted, onBeforeUnmount } from 'vue'
 import { getDocument, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
-import { PdfSource, ZoomType } from '../types'
+import { PdfSource, ZoomType } from './types'
 
 const props = defineProps<{
-  hideText?: boolean,
-  hideNumber?: boolean,
+  hideText: boolean,
+  hideNumber: boolean,
   zoomType: ZoomType,
   zoom: number,
   viewport: {
@@ -103,7 +103,6 @@ onBeforeUnmount(() => {
       :hide-text="hideText"
       :zoom-type="zoomType"
       :zoom="zoom"
-      @update:zoom="emits('update:zoom', $event)"
       :observer="observer"
       :viewport="viewport"
     >

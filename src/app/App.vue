@@ -2,19 +2,22 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { ref } from 'vue'
-import PdfHost from './components/PdfHost.vue'
-import { ZoomType } from './types'
+import PdfHost from '../PdfHost.vue'
+import { ZoomType } from '../types'
 
-const scroller = ref()
+const host = ref()
 const zooms = ref([{
   text: 'Auto',
-  type: ZoomType.Auto
+  type: ZoomType.Auto,
+  value: undefined,
 }, {
   text: 'Fit width',
-  type: ZoomType.WidthFit
+  type: ZoomType.WidthFit,
+  value: undefined,
 }, {
   text: 'Fit page',
-  type: ZoomType.PageFit
+  type: ZoomType.PageFit,
+  value: undefined,
 }, {
   text: '200%',
   type: ZoomType.Custom,
@@ -71,7 +74,7 @@ function changeZoom(e: Event) {
 <template>
   <div style="height:100vh">
     <pdf-host
-      ref="scroller"
+      ref="host"
       v-model:zoom-type="zoomType"
       v-model:zoom="zoom"
       worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
@@ -79,8 +82,8 @@ function changeZoom(e: Event) {
     >
       <template>
         <div style="position:fixed;top:0;z-index:1">
-          <button @click="scroller.zoomIn">Zoom in</button>
-          <button @click="scroller.zoomOut">Zoom out</button>
+          <button @click="host.zoomIn">Zoom in</button>
+          <button @click="host.zoomOut">Zoom out</button>
           <select @change="changeZoom">
             <option v-for="zoom in zooms" :value="zoom.value || zoom.type">{{ zoom.text }}</option>
           </select>

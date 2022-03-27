@@ -1,12 +1,15 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed, onMounted, onBeforeUnmount } from 'vue'
 import PdfDocument from './components/PdfDocument.vue'
 
 const rootEl = ref()
-const zoomDelta = ref(0)
+const zoomDelta = ref<number | string>('auto')
 const zooms = ref([{
+  text: 'auto',
+  delta: 'auto'
+}, {
   text: '200%',
   delta: 1
 }, {
@@ -31,6 +34,7 @@ const zooms = ref([{
   text: '25%',
   delta: -.75
 }])
+const viewport = ref({ width: 0, height: 0 })
 
 function onMouseWheel(e: WheelEvent) {
   if (e.ctrlKey) {
@@ -44,16 +48,32 @@ function onMouseWheel(e: WheelEvent) {
   }
 }
 function zoomIn() {
-  zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
+  // zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
 }
 function zoomOut() {
-  zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
+  // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
 }
 function printScroll() {
   const root = rootEl.value as HTMLDivElement
   console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
 }
+function updateViewport() {
+  const root = rootEl.value
+  if (root) {
+    viewport.value = {
+      width: root.offsetWidth,
+      height: root.offsetHeight
+    }
+  }
 
+}
+onMounted(() => {
+  window.addEventListener('resize', updateViewport)
+  updateViewport()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateViewport)
+})
 // watch(zoomDelta, (newDelta, oldDelta) => {
 //   const root = rootEl.value as HTMLDivElement
 //   if (root) {
@@ -79,7 +99,7 @@ function printScroll() {
   <div
     ref="rootEl"
     @wheel="onMouseWheel"
-    style="height:100vh;overflow:auto;padding:1rem;background:gainsboro;"
+    style="height:100vh;overflow:auto;padding:1rem 0;background:gainsboro;"
   >
     <div style="position:fixed;top:0;z-index:1">
       <button @click="zoomIn">Zoom in</button>
@@ -90,7 +110,8 @@ function printScroll() {
       <button @click="printScroll">test</button>
     </div>
     <pdf-document
-      :zoom="1 + zoomDelta"
+      :viewport="viewport"
+      :zoom="zoomDelta"
       worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
       src="/samples/compressed.tracemonkey-pldi-09.pdf"
     ></pdf-document>

@@ -5,7 +5,17 @@ import { TypedArray, DocumentInitParameters } from 'pdfjs-dist/types/src/display
 import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
 
-const props = defineProps<{ zoom: number, workerJs: string, src: string | URL | PDFDataRangeTransport | TypedArray | DocumentInitParameters }>()
+const props = defineProps<{
+  hideText?: boolean,
+  hideNumber?: boolean,
+  zoom: number | string,
+  workerJs: string,
+  viewport: {
+    width: number,
+    height: number
+  },
+  src: string | URL | PDFDataRangeTransport | TypedArray | DocumentInitParameters
+}>()
 const emits = defineEmits<{ (e: 'error', error: any): void }>()
 
 const pixelRatio = ref(window.devicePixelRatio)
@@ -89,12 +99,14 @@ onBeforeUnmount(() => {
     <pdf-page
       v-for="page in pdfPages"
       :ref="setPageComp"
-      :hide-text="false"
       :key="page.pageNumber"
       :page="page"
+      :hide-number="hideNumber"
+      :hide-text="hideText"
       :pixelRatio="pixelRatio"
-      :zoom="zoom || 1"
+      :zoom="zoom"
       :observer="observer"
+      :viewport="viewport"
     >
       <template #default="{ width, height }">
         <slot :page="page.pageNumber" :width="width" :height="height"></slot>

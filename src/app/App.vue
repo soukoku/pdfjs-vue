@@ -80,7 +80,7 @@ function changeZoom(e: Event) {
       worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
       :sources="['/samples/compressed.tracemonkey-pldi-09.pdf']"
     >
-      <template>
+      <template #default>
         <div style="position:fixed;top:0;z-index:1">
           <button @click="host.zoomIn">Zoom in</button>
           <button @click="host.zoomOut">Zoom out</button>

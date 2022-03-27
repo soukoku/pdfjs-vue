@@ -30,6 +30,7 @@ const pageComps = ref<any[]>([])
 
 function setPageComp(component: any) {
   pageComps.value.push(component)
+  if (pageComps.value.length == 1) component.inViewport = true
 }
 function cleanupDoc() {
   pdfPages.value.forEach(pg => pg.cleanup())

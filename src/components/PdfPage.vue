@@ -26,7 +26,8 @@ const maxAutoWidth = 1100
 
 defineExpose({ rootEl, inViewport })
 
-const baseScale = 96 / 72
+// convert pdf dpi (72) to base screen dpi (96)
+const baseScale = 96 / 72 
 
 const pdfScale = computed(() => {
   const { width: pageWidth, height: pageHeight } = props.page.getViewport({ scale: baseScale })

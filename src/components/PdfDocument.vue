@@ -80,11 +80,9 @@ onMounted(() => {
   // mediaQuery.addEventListener("change", updatePixelRatio)
   observer.value = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const foundComp = pageComps.value.find(comp => comp?.rootEl === entry.target)
-        if (foundComp) {
-          foundComp.inViewport = true
-        }
+      const foundComp = pageComps.value.find(comp => comp?.rootEl === entry.target)
+      if (foundComp) {
+        foundComp.inViewport = entry.isIntersecting
       }
     })
   }, 50), {

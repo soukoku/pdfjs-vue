@@ -3,7 +3,7 @@
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { ref } from 'vue'
 import PdfDocument from './components/PdfDocument.vue'
-import PdfScroller from './components/PdfScroller.vue'
+import PdfHost from './components/PdfHost.vue'
 import { ZoomType } from './types'
 
 const scroller = ref()
@@ -71,7 +71,7 @@ function changeZoom(e: Event) {
 
 <template>
   <div style="height:100vh">
-    <pdf-scroller ref="scroller" v-model:zoom-type="zoomType" v-model:zoom="zoom">
+    <pdf-host ref="scroller" v-model:zoom-type="zoomType" v-model:zoom="zoom">
       <template #default="{ viewport }">
         <div style="position:fixed;top:0;z-index:1">
           <button @click="scroller.zoomIn">Zoom in</button>
@@ -88,6 +88,6 @@ function changeZoom(e: Event) {
           src="/samples/compressed.tracemonkey-pldi-09.pdf"
         ></pdf-document>
       </template>
-    </pdf-scroller>
+    </pdf-host>
   </div>
 </template>

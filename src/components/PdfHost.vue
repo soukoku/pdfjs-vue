@@ -96,13 +96,18 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-  <div
-    ref="rootEl"
-    @wheel="onMouseWheel"
-    @keydown="onKeydown"
-    tabindex="0"
-    style="height:100%;overflow:auto;padding:1rem 0;background:gainsboro;"
-  >
+  <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
     <slot :viewport="viewport"></slot>
   </div>
 </template>
+<style>
+.pdf-host {
+  height: 100%;
+  overflow: auto;
+  padding: 1rem 0;
+  background: gainsboro;
+}
+.pdf-host:focus {
+  outline: none;
+}
+</style>

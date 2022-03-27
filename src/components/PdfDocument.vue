@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import { ref, watch, shallowRef, onMounted, onBeforeUnmount } from 'vue'
-import { GlobalWorkerOptions, getDocument, PDFDataRangeTransport, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
-import { TypedArray, DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
+import { getDocument, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
-import { ZoomType } from '../types'
+import { PdfSource, ZoomType } from '../types'
 
 const props = defineProps<{
   hideText?: boolean,
   hideNumber?: boolean,
   zoomType: ZoomType,
   zoom: number,
-  workerJs: string,
   viewport: {
     width: number,
     height: number
   },
-  src: string | URL | PDFDataRangeTransport | TypedArray | DocumentInitParameters
+  src: PdfSource
 }>()
 const emits = defineEmits<{
   (e: 'error', error: any): void,
@@ -49,9 +47,6 @@ function cleanupDoc() {
 
 
 watch(() => props.src, src => {
-  if (!GlobalWorkerOptions.workerSrc)
-    GlobalWorkerOptions.workerSrc = props.workerJs
-
   cleanupDoc()
   if (!src) return
 
@@ -113,7 +108,7 @@ onBeforeUnmount(() => {
       :viewport="viewport"
     >
       <template #default="{ width, height }">
-        <slot :page="page" :width="width" :height="height"></slot>
+        <slot :doc="pdfDoc" :page="page" :width="width" :height="height"></slot>
       </template>
     </pdf-page>
   </div>

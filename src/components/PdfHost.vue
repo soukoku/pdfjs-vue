@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { ZoomType } from '../types'
+import { GlobalWorkerOptions } from 'pdfjs-dist'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { PdfSource, ZoomType } from '../types'
+import PdfDocument from './PdfDocument.vue'
 
 const props = defineProps<{
   zoomType?: ZoomType
-  zoom: number
+  zoom: number,
+  workerJs: string,
+  sources: PdfSource[]
 }>()
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
@@ -16,6 +20,10 @@ defineExpose({
   zoomIn,
   zoomOut
 })
+
+watch(() => props.workerJs, js => {
+  GlobalWorkerOptions.workerSrc = js
+}, { immediate: true })
 
 function onMouseWheel(e: WheelEvent) {
   if (e.ctrlKey) {
@@ -96,7 +104,18 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
-    <slot :viewport="viewport"></slot>
+    <pdf-document
+      v-for="src in sources"
+      :viewport="viewport"
+      :zoom-type="zoomType || ZoomType.Auto"
+      v-model:zoom="zoom"
+      :src="src"
+    >
+      <template #default="{ doc, page, width, height }">
+        <slot name="page" :doc="doc" :page="page" :width="width" :height="height"></slot>
+      </template>
+    </pdf-document>
+    <slot></slot>
   </div>
 </template>
 <style>

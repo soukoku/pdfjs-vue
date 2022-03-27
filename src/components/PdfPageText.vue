@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { PageViewport, PDFPageProxy, renderTextLayer } from 'pdfjs-dist'
-import { TextContent } from 'pdfjs-dist/types/src/display/api'
 
 const props = defineProps<{ viewport: PageViewport, page: PDFPageProxy }>()
-const textContent = ref<TextContent>()
+const textContent = ref()
 const rootEl = ref<HTMLDivElement>()
 
 watch(() => props.page, async page => {

@@ -2,7 +2,6 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { ref } from 'vue'
-import PdfDocument from './components/PdfDocument.vue'
 import PdfHost from './components/PdfHost.vue'
 import { ZoomType } from './types'
 
@@ -71,8 +70,14 @@ function changeZoom(e: Event) {
 
 <template>
   <div style="height:100vh">
-    <pdf-host ref="scroller" v-model:zoom-type="zoomType" v-model:zoom="zoom">
-      <template #default="{ viewport }">
+    <pdf-host
+      ref="scroller"
+      v-model:zoom-type="zoomType"
+      v-model:zoom="zoom"
+      worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
+      :sources="['/samples/compressed.tracemonkey-pldi-09.pdf']"
+    >
+      <template>
         <div style="position:fixed;top:0;z-index:1">
           <button @click="scroller.zoomIn">Zoom in</button>
           <button @click="scroller.zoomOut">Zoom out</button>
@@ -80,13 +85,6 @@ function changeZoom(e: Event) {
             <option v-for="zoom in zooms" :value="zoom.value || zoom.type">{{ zoom.text }}</option>
           </select>
         </div>
-        <pdf-document
-          :viewport="viewport"
-          :zoom-type="zoomType"
-          v-model:zoom="zoom"
-          worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
-          src="/samples/compressed.tracemonkey-pldi-09.pdf"
-        ></pdf-document>
       </template>
     </pdf-host>
   </div>

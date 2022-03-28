@@ -5,9 +5,11 @@
   "files": [
     "dist/pdfjs*",
     "dist/style*",
-    "dist/index.d.ts"
+    "types/index*",
+    "types/types*",
+    "types/PdfHost*"
   ],
-  "types": "./dist/index.d.ts",
+  "types": "./types/index.d.ts",
   "main": "./dist/pdfjs-vue.umd.js",
   "module": "./dist/pdfjs-vue.es.js",
   "exports": {

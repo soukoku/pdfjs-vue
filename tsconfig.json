@@ -13,10 +13,10 @@
       "esnext",
       "dom"
     ],
-    "outDir": "dist",
+    "outDir": "types",
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outFile": "dist/index.ts"
+    // "outFile": "dist/index.ts"
   },
   "include": [
     "src/index.ts",

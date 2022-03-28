@@ -70,7 +70,13 @@ const displayViewport = computed(() => {
 })
 
 watch(pdfScale, newScale => {
-  emits('update:zoom', newScale / baseScale)
+  const newZoom = newScale / baseScale
+  const delta = Math.abs(newZoom - props.zoom)
+  // console.log(`newzoom=${newZoom}, old zoom=${props.zoom}, delta=${delta}`)
+  if (delta > .05) {
+    // console.log('updating zoom upwards')
+    emits('update:zoom', newZoom)
+  }
 }, { immediate: true })
 
 let renderTask: RenderTask | undefined

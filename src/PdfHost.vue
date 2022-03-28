@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GlobalWorkerOptions } from 'pdfjs-dist'
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { PdfSource, ZoomType } from './types'
 import PdfDocument from './PdfDocument.vue'
 import debounce from 'lodash/debounce'
@@ -80,24 +80,22 @@ function zoomOut() {
   emits('update:zoomType', ZoomType.Custom)
   // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
 }
-// watch(zoomDelta, (newDelta, oldDelta) => {
-//   const root = rootEl.value as HTMLDivElement
-//   if (root) {
-//     // try to keep current scroll posn after zoom change
-//     // just an idea, to be improved so it actually works
-//     const curTop = root.scrollTop
-//     const curLeft = root.scrollLeft
-//     const zoomIn = newDelta > oldDelta
-//     const change = Math.abs(newDelta - oldDelta)
-//     const ratio = zoomIn ? 1 / (1 - change) : (1 - change)
-//     console.log(`old scrolls ${curLeft}, ${curTop}, ${ratio}`)
-//     nextTick(() => {
-//       root.scrollTop = curTop * ratio
-//       root.scrollLeft = curLeft * ratio
-//       console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
-//     })
-//   }
-// })
+watch(() => props.zoom, (newZoom, oldZoom) => {
+  const root = rootEl.value as HTMLDivElement
+  if (root) {
+    // try to keep current scroll posn after zoom change
+    // just an idea, to be improved so it actually works
+    const curTop = root.scrollTop
+    const curLeft = root.scrollLeft
+    const ratio = newZoom / oldZoom
+    console.log(`old scrolls ${curLeft}, ${curTop}, zoom from ${oldZoom} to ${newZoom} @ ${ratio}`)
+    nextTick(() => {
+      root.scrollTop = curTop * ratio
+      root.scrollLeft = curLeft * ratio
+      console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
+    })
+  }
+})
 onMounted(() => {
   window.addEventListener('resize', updateViewport)
   updateViewport()

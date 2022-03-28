@@ -77,7 +77,7 @@ function changeZoom(e: Event) {
       ref="host"
       v-model:zoom-type="zoomType"
       v-model:zoom="zoom"
-      worker-js="/js/pdfjs/2.13.216/pdf.worker.min.js"
+      worker-src="/js/pdfjs/2.13.216/pdf.worker.min.js"
       :sources="['/samples/compressed.tracemonkey-pldi-09.pdf']"
     >
       <template #default>

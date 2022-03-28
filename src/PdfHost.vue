@@ -88,11 +88,11 @@ watch(() => props.zoom, (newZoom, oldZoom) => {
     const curTop = root.scrollTop
     const curLeft = root.scrollLeft
     const ratio = newZoom / oldZoom
-    console.log(`old scrolls ${curLeft}, ${curTop}, zoom from ${oldZoom} to ${newZoom} @ ${ratio}`)
+    // console.log(`old scrolls ${curLeft}, ${curTop}, zoom from ${oldZoom} to ${newZoom} @ ${ratio}`)
     nextTick(() => {
       root.scrollTop = curTop * ratio
       root.scrollLeft = curLeft * ratio
-      console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
+      // console.log(`new scrolls=`, root.scrollLeft, root.scrollTop)
     })
   }
 })

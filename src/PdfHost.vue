@@ -6,11 +6,29 @@ import PdfDocument from './PdfDocument.vue'
 import debounce from 'lodash/debounce'
 
 const props = defineProps<{
+  /**
+   * Pdfjs's worker script url. Must be set if haven't been set elsewhere.
+   */
   workerSrc?: string,
+  /**
+   * Array of pdf sources to display.
+   */
   sources: PdfSource[],
+  /**
+   * Type of zoom used. Defaults to Auto.
+   */
   zoomType?: ZoomType,
+  /**
+   * Display zoom percentage if using custom zoom, defaults to 1 (100%).
+   */
   zoom?: number,
+  /**
+   * Hides the selectable text layer.
+   */
   hideText?: boolean,
+  /**
+   * Hides page number display.
+   */
   hideNumber?: boolean,
 }>()
 const emits = defineEmits<{
@@ -20,7 +38,13 @@ const emits = defineEmits<{
 const rootEl = ref()
 
 defineExpose({
+  /**
+   * Try to increase zoom to the next level, up to 200%.
+   */
   zoomIn,
+  /**
+   * Try to decrease zoom to the next level, down to 25%.
+   */
   zoomOut
 })
 

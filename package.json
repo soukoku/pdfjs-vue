@@ -1,5 +1,5 @@
 {
-  "name": "pdfjs-vue",
+  "name": "pdfjs-vue3",
   "version": "0.1.0",
   "description": "Using pdfjs to display PDFs as a vue 3 component.",
   "files": [
@@ -10,12 +10,12 @@
     "types/PdfHost*"
   ],
   "types": "./types/index.d.ts",
-  "main": "./dist/pdfjs-vue.umd.js",
-  "module": "./dist/pdfjs-vue.es.js",
+  "main": "./dist/pdfjs-vue3.umd.js",
+  "module": "./dist/pdfjs-vue3.es.js",
   "exports": {
     ".": {
-      "import": "./dist/pdfjs-vue.es.js",
-      "require": "./dist/pdfjs-vue.umd.js"
+      "import": "./dist/pdfjs-vue3.es.js",
+      "require": "./dist/pdfjs-vue3.umd.js"
     }
   },
   "scripts": {

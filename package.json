@@ -1,7 +1,17 @@
 {
   "name": "pdfjs-vue3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Using pdfjs to display PDFs as a vue 3 component.",
+  "author": "Eugene Wang",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/soukoku/pdfjs-vue",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soukoku/pdfjs-vue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/soukoku/pdfjs-vue/issues"
+  },
   "files": [
     "dist/pdfjs*",
     "dist/style*",
@@ -11,6 +21,7 @@
   ],
   "types": "./types/index.d.ts",
   "main": "./dist/pdfjs-vue3.umd.js",
+	"style": "./dist/style.css",
   "module": "./dist/pdfjs-vue3.es.js",
   "exports": {
     ".": {

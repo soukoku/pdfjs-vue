@@ -6,10 +6,10 @@ import PdfDocument from './PdfDocument.vue'
 import debounce from 'lodash/debounce'
 
 const props = defineProps<{
-  workerJs: string,
+  workerSrc?: string,
   sources: PdfSource[],
   zoomType?: ZoomType,
-  zoom: number,
+  zoom?: number,
   hideText?: boolean,
   hideNumber?: boolean,
 }>()
@@ -24,8 +24,8 @@ defineExpose({
   zoomOut
 })
 
-watch(() => props.workerJs, js => {
-  GlobalWorkerOptions.workerSrc = js
+watch(() => props.workerSrc, js => {
+  if (js) GlobalWorkerOptions.workerSrc = js
 }, { immediate: true })
 
 function onMouseWheel(e: WheelEvent) {
@@ -72,17 +72,15 @@ function zoomIn() {
   const proposed = fitZoom((props.zoom || 1) + .25)
   emits('update:zoom', Math.min(proposed, 2))
   emits('update:zoomType', ZoomType.Custom)
-  // zoomDelta.value = Math.min(zoomDelta.value + .25, 2)
 }
 function zoomOut() {
   const proposed = fitZoom((props.zoom || 1) - .25)
   emits('update:zoom', Math.max(proposed, .25))
   emits('update:zoomType', ZoomType.Custom)
-  // zoomDelta.value = Math.max(zoomDelta.value - .25, -.75)
 }
 watch(() => props.zoom, (newZoom, oldZoom) => {
   const root = rootEl.value as HTMLDivElement
-  if (root) {
+  if (root && newZoom && oldZoom) {
     // try to keep current scroll posn after zoom change
     // just an idea, to be improved so it actually works
     const curTop = root.scrollTop
@@ -113,7 +111,7 @@ onBeforeUnmount(() => {
       :hide-number="!!hideNumber"
       :hide-text="!!hideText"
       :zoom-type="zoomType || ZoomType.Auto"
-      :zoom="zoom"
+      :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)"
     >
       <template #default="{ doc, page, width, height }">

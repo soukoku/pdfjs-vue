@@ -138,8 +138,8 @@ onBeforeUnmount(() => {
       :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)"
     >
-      <template #default="{ doc, page, width, height }">
-        <slot name="page" :doc="doc" :page="page" :width="width" :height="height"></slot>
+      <template #default="{ doc, page, displaySize }">
+        <slot name="page" :src="src" :doc="doc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-document>
     <slot></slot>

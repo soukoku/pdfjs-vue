@@ -108,8 +108,8 @@ onBeforeUnmount(() => {
       :observer="observer"
       :viewport="viewport"
     >
-      <template #default="{ width, height }">
-        <slot :doc="pdfDoc" :page="page" :width="width" :height="height"></slot>
+      <template #default="{ displaySize }">
+        <slot :doc="pdfDoc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-page>
   </div>

@@ -36,7 +36,7 @@ function renderText() {
     textContent: textContent.value,
     container: el,
     viewport: vp,
-    enhanceTextSelection: true
+    // enhanceTextSelection: true
   })
   renderTask.promise.then(() => {
     renderTask = undefined

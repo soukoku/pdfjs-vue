@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-vue3",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Using pdfjs to display PDFs as a vue 3 component.",
   "author": "Eugene Wang",
   "license": "Apache-2.0",

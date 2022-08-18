@@ -31,9 +31,11 @@ let pageComps = [] as any[]
 const isLoading = ref(false)
 const loadPercent = ref(0)
 
-function setPageComp(component: any) {
-  pageComps.push(component)
-  if (pageComps.length == 1) component.inViewport = true
+function setPageComp(component?: any) {
+  if (!!component) {
+    pageComps.push(component)
+    if (pageComps.length == 1) component.inViewport = true
+  }
 }
 function cleanupDoc() {
   pdfPages.value.forEach(pg => pg.cleanup())

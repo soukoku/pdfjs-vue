@@ -131,11 +131,11 @@ onBeforeUnmount(() => {
     <pdf-document v-for="src in sources" :viewport="viewport" :src="src" :hide-number="!!hideNumber"
       :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)">
-      <template #loading="{ loading, progress, src }">
+      <template #loading="{ loading, progress }">
         <slot name="loading" :source="src" :loading="loading" :progress="progress"></slot>
       </template>
       <template #default="{ doc, page, displaySize }">
-        <slot name="page" :src="src" :doc="doc" :page="page" :displaySize="displaySize"></slot>
+        <slot name="page" :source="src" :doc="doc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-document>
     <slot></slot>

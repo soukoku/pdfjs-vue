@@ -128,16 +128,12 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
-    <pdf-document
-      v-for="src in sources"
-      :viewport="viewport"
-      :src="src"
-      :hide-number="!!hideNumber"
-      :hide-text="!!hideText"
-      :zoom-type="zoomType || ZoomType.Auto"
-      :zoom="zoom || 1"
-      @update:zoom="emits('update:zoom', $event)"
-    >
+    <pdf-document v-for="src in sources" :viewport="viewport" :src="src" :hide-number="!!hideNumber"
+      :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
+      @update:zoom="emits('update:zoom', $event)">
+      <template #loading="{ loading, progress, src }">
+        <slot name="loading" :source="src" :loading="loading" :progress="progress"></slot>
+      </template>
       <template #default="{ doc, page, displaySize }">
         <slot name="page" :src="src" :doc="doc" :page="page" :displaySize="displaySize"></slot>
       </template>
@@ -152,6 +148,7 @@ onBeforeUnmount(() => {
   padding: 1rem 0;
   background: gainsboro;
 }
+
 .pdf-host:focus {
   outline: none;
 }

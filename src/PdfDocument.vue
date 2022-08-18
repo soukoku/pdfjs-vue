@@ -4,6 +4,7 @@ import { getDocument, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
 import { PdfSource, ZoomType } from './types'
+import { OnProgressParameters } from 'pdfjs-dist/types/src/display/api'
 
 const props = defineProps<{
   hideText: boolean,
@@ -27,6 +28,8 @@ const pdfPages = shallowRef<PDFPageProxy[]>([])
 const observer = shallowRef<IntersectionObserver>()
 const rootEl = ref()
 const pageComps = ref<any[]>([])
+const isLoading = ref(false)
+const loadPercent = ref(0)
 
 function setPageComp(component: any) {
   pageComps.value.push(component)
@@ -51,7 +54,12 @@ watch(() => props.src, src => {
   cleanupDoc()
   if (!src) return
 
-  getDocument(src).promise
+  const task = getDocument(src)
+  isLoading.value = true
+  task.onProgress = (prog: OnProgressParameters) => {
+    if (prog.total) loadPercent.value = prog.loaded / prog.total
+  }
+  task.promise
     .then(doc => {
       pdfDoc.value = doc
 
@@ -67,6 +75,8 @@ watch(() => props.src, src => {
     })
     .catch(err => {
       emits('error', err)
+    }).finally(() => {
+      isLoading.value = false
     })
 }, { immediate: true })
 
@@ -95,22 +105,21 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="rootEl">
-    <pdf-page
-      v-for="page in pdfPages"
-      :ref="setPageComp"
-      :key="page.pageNumber"
-      :page="page"
-      :hide-number="hideNumber"
-      :hide-text="hideText"
-      :zoom-type="zoomType"
-      :zoom="zoom"
-      @update:zoom="emits('update:zoom', $event)"
-      :observer="observer"
-      :viewport="viewport"
-    >
+    <slot name="loading" :src="props.src" :loading="isLoading" :progress="loadPercent">
+      <p class="pdf-progress" v-if="isLoading">loading {{ Math.ceil(100 * loadPercent) }}%</p>
+    </slot>
+    <pdf-page v-for="page in pdfPages" :ref="setPageComp" :key="page.pageNumber" :page="page" :hide-number="hideNumber"
+      :hide-text="hideText" :zoom-type="zoomType" :zoom="zoom" @update:zoom="emits('update:zoom', $event)"
+      :observer="observer" :viewport="viewport">
       <template #default="{ displaySize }">
         <slot :doc="pdfDoc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-page>
   </div>
 </template> 
+<style>
+.pdf-progress {
+  text-align: center;
+  padding: 1rem;
+}
+</style>

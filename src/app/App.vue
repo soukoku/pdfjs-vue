@@ -69,6 +69,8 @@ function changeZoom(e: Event) {
 //   if()
 // })
 
+const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-rotations.pdf']
+
 </script>
 
 <template>
@@ -77,9 +79,12 @@ function changeZoom(e: Event) {
       ref="host"
       v-model:zoom-type="zoomType"
       v-model:zoom="zoom"
-      worker-src="/js/pdfjs/2.13.216/pdf.worker.min.js"
-      :sources="['/samples/compressed.tracemonkey-pldi-09.pdf']"
+      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js"
+      :sources="files"
     >
+      <template #page="{ page, displaySize }">
+        <div>page {{ page.pageNumber }} size = {{ displaySize }}</div>
+      </template>
       <template #default>
         <div style="position:fixed;top:0;z-index:1">
           <button @click="host.zoomIn">Zoom in</button>

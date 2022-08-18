@@ -27,13 +27,13 @@ const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
 const observer = shallowRef<IntersectionObserver>()
 const rootEl = ref()
-const pageComps = ref<any[]>([])
+let pageComps = [] as any[]
 const isLoading = ref(false)
 const loadPercent = ref(0)
 
 function setPageComp(component: any) {
-  pageComps.value.push(component)
-  if (pageComps.value.length == 1) component.inViewport = true
+  pageComps.push(component)
+  if (pageComps.length == 1) component.inViewport = true
 }
 function cleanupDoc() {
   pdfPages.value.forEach(pg => pg.cleanup())
@@ -43,6 +43,7 @@ function cleanupDoc() {
     doc.destroy()
     pdfDoc.value = undefined
   }
+  pageComps = []
 }
 // function updatePixelRatio() {
 //   console.debug(`new pixel ratio=${window.devicePixelRatio}`)
@@ -86,7 +87,7 @@ onMounted(() => {
   // mediaQuery.addEventListener("change", updatePixelRatio)
   observer.value = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
-      const foundComp = pageComps.value.find(comp => comp?.rootEl === entry.target)
+      const foundComp = pageComps.find(comp => comp?.rootEl === entry.target)
       if (foundComp) {
         foundComp.inViewport = entry.isIntersecting
       }

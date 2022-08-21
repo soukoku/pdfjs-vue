@@ -147,10 +147,12 @@ function handlePointerMove(e: PointerEvent) {// Find this event in the cache and
     if (pzPrevDiff > 0) {
       if (curDiff > pzPrevDiff) {
         // The distance between the two pointers has increased
+        e.preventDefault()
         zoomIn()
       }
       if (curDiff < pzPrevDiff) {
         // The distance between the two pointers has decreased
+        e.preventDefault()
         zoomOut()
       }
     }
@@ -196,6 +198,7 @@ function handlePointerUp(e: PointerEvent) {
   overflow: auto;
   padding: 1rem 0;
   background: gainsboro;
+  touch-action: none;
 }
 
 .pdf-host:focus {

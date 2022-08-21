@@ -126,33 +126,37 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewport)
 })
 
-// pz = pinch zoom gesture use, logic copied from mdn
+// pz = pinch zoom gesture use, logic modified from mdn sample
 const pzEvtCache = [] as PointerEvent[]
 let pzPrevDiff = -1
 function handlePointerDown(e: PointerEvent) {
   pzEvtCache.push(e)
 }
-function handlePointerMove(e: PointerEvent) {// Find this event in the cache and update its record with this event
+const handlePointerMove = debounce((e: PointerEvent) => {// Find this event in the cache and update its record with this event
   for (let i = 0; i < pzEvtCache.length; i++) {
     if (e.pointerId === pzEvtCache[i].pointerId) {
       pzEvtCache[i] = e
       break
     }
   }
+  // console.log('pointer move cache=' + pzEvtCache.length)
   // If two pointers are down, check for pinch gestures
   if (pzEvtCache.length === 2) {
     // Calculate the distance between the two pointers
-    const curDiff = Math.abs(pzEvtCache[0].clientX - pzEvtCache[1].clientX)
+    const dx = Math.abs(pzEvtCache[0].clientX - pzEvtCache[1].clientX)
+    const dy = Math.abs(pzEvtCache[0].clientY - pzEvtCache[1].clientY)
+    const curDiff = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
 
+    // const delta = Math.abs(curDiff - pzPrevDiff)
+    // console.log('curdiff=' + curDiff + ', prev=' + pzPrevDiff + ', delta=' + delta)
     if (pzPrevDiff > 0) {
+
       if (curDiff > pzPrevDiff) {
         // The distance between the two pointers has increased
-        e.preventDefault()
         zoomIn()
       }
       if (curDiff < pzPrevDiff) {
         // The distance between the two pointers has decreased
-        e.preventDefault()
         zoomOut()
       }
     }
@@ -160,7 +164,8 @@ function handlePointerMove(e: PointerEvent) {// Find this event in the cache and
     // Cache the distance for the next move event
     pzPrevDiff = curDiff
   }
-}
+}, 10)
+
 function handlePointerUp(e: PointerEvent) {
   // Remove this event from the target's cache
   for (let i = 0; i < pzEvtCache.length; i++) {
@@ -198,7 +203,7 @@ function handlePointerUp(e: PointerEvent) {
   overflow: auto;
   padding: 1rem 0;
   background: gainsboro;
-  touch-action: none;
+  touch-action: pan-x pan-y;
 }
 
 .pdf-host:focus {

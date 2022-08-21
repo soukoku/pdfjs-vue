@@ -125,9 +125,58 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewport)
 })
+
+// pz = pinch zoom gesture use, logic copied from mdn
+const pzEvtCache = [] as PointerEvent[]
+let pzPrevDiff = -1
+function handlePointerDown(e: PointerEvent) {
+  pzEvtCache.push(e)
+}
+function handlePointerMove(e: PointerEvent) {// Find this event in the cache and update its record with this event
+  for (let i = 0; i < pzEvtCache.length; i++) {
+    if (e.pointerId === pzEvtCache[i].pointerId) {
+      pzEvtCache[i] = e
+      break
+    }
+  }
+  // If two pointers are down, check for pinch gestures
+  if (pzEvtCache.length === 2) {
+    // Calculate the distance between the two pointers
+    const curDiff = Math.abs(pzEvtCache[0].clientX - pzEvtCache[1].clientX)
+
+    if (pzPrevDiff > 0) {
+      if (curDiff > pzPrevDiff) {
+        // The distance between the two pointers has increased
+        zoomIn()
+      }
+      if (curDiff < pzPrevDiff) {
+        // The distance between the two pointers has decreased
+        zoomOut()
+      }
+    }
+
+    // Cache the distance for the next move event
+    pzPrevDiff = curDiff
+  }
+}
+function handlePointerUp(e: PointerEvent) {
+  // Remove this event from the target's cache
+  for (let i = 0; i < pzEvtCache.length; i++) {
+    if (pzEvtCache[i].pointerId === e.pointerId) {
+      pzEvtCache.splice(i, 1)
+      break
+    }
+  }
+  // If the number of pointers down is less than two then reset diff tracker
+  if (pzEvtCache.length < 2) {
+    pzPrevDiff = -1
+  }
+}
 </script>
 <template>
-  <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
+  <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" @pointerdown="handlePointerDown"
+    @pointermove="handlePointerMove" @pointerup="handlePointerUp" @pointercancel="handlePointerUp"
+    @pointerleave="handlePointerUp" @pointerout="handlePointerUp" tabindex="0" class="pdf-host">
     <pdf-document v-for="src in sources" :viewport="viewport" :src="src" :hide-number="!!hideNumber"
       :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)">

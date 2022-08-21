@@ -75,13 +75,8 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
 
 <template>
   <div style="height:100vh">
-    <pdf-host
-      ref="host"
-      v-model:zoom-type="zoomType"
-      v-model:zoom="zoom"
-      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js"
-      :sources="files"
-    >
+    <pdf-host ref="host" v-model:zoom-type="zoomType" v-model:zoom="zoom"
+      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js" :sources="files">
       <template #page="{ page, displaySize }">
         <div>page {{ page.pageNumber }} size = {{ displaySize }}</div>
       </template>
@@ -90,7 +85,9 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
           <button @click="host.zoomIn">Zoom in</button>
           <button @click="host.zoomOut">Zoom out</button>
           <select @change="changeZoom">
-            <option v-for="zoom in zooms" :value="zoom.value || zoom.type">{{ zoom.text }}</option>
+            <option v-for="z in zooms" :value="z.value || z.type" :selected="z.value === zoom && z.type === zoomType">{{
+                z.text
+            }}</option>
           </select>
         </div>
       </template>

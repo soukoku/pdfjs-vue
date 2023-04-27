@@ -74,23 +74,27 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
 </script>
 
 <template>
-  <div style="height:100vh;height:100dvh;">
+  <div style="height:100vh;height:100dvh; overflow: hidden; display:flex; flex-direction: column;">
+
+    <div style="flex:none;">
+      <button @click="host.zoomIn">Zoom in</button>
+      <button @click="host.zoomOut">Zoom out</button>
+      <select @change="changeZoom">
+        <option v-for="z in zooms" :value="z.value || z.type" :selected="z.value === zoom && z.type === zoomType">{{
+          z.text
+        }}</option>
+      </select>
+      Sample top toolbar
+    </div>
+
     <pdf-host ref="host" v-model:zoom-type="zoomType" v-model:zoom="zoom"
-      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js" :sources="files">
+      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js" :sources="files" style="flex: 1 1 auto;">
       <template #page="{ page, displaySize }">
         <div>page {{ page.pageNumber }} size = {{ displaySize }}</div>
       </template>
-      <template #default>
-        <div style="position:fixed;top:0;z-index:1">
-          <button @click="host.zoomIn">Zoom in</button>
-          <button @click="host.zoomOut">Zoom out</button>
-          <select @change="changeZoom">
-            <option v-for="z in zooms" :value="z.value || z.type" :selected="z.value === zoom && z.type === zoomType">{{
-                z.text
-            }}</option>
-          </select>
-        </div>
-      </template>
     </pdf-host>
+    <div style="flex:none;height:30px; background:green; color:white;">
+      Sample bottom toolbar
+    </div>
   </div>
 </template>

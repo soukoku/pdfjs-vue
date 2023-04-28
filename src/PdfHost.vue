@@ -30,6 +30,10 @@ const props = defineProps<{
    * Hides page number display.
    */
   hideNumber?: boolean,
+  /**
+   * Experimental flag to enable pinch zoom gesture.
+   */
+  enablePinchZoom?: boolean
 }>()
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
@@ -130,9 +134,11 @@ onBeforeUnmount(() => {
 const pzEvtCache = [] as PointerEvent[]
 let pzPrevDiff = -1
 function handlePointerDown(e: PointerEvent) {
+  if (!props.enablePinchZoom) return
   pzEvtCache.push(e)
 }
 const handlePointerMove = debounce((e: PointerEvent) => {// Find this event in the cache and update its record with this event
+  if (!props.enablePinchZoom) return
   for (let i = 0; i < pzEvtCache.length; i++) {
     if (e.pointerId === pzEvtCache[i].pointerId) {
       pzEvtCache[i] = e
@@ -167,6 +173,7 @@ const handlePointerMove = debounce((e: PointerEvent) => {// Find this event in t
 }, 10)
 
 function handlePointerUp(e: PointerEvent) {
+  if (!props.enablePinchZoom) return;
   // Remove this event from the target's cache
   for (let i = 0; i < pzEvtCache.length; i++) {
     if (pzEvtCache[i].pointerId === e.pointerId) {

@@ -88,7 +88,7 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
     </div>
 
     <pdf-host ref="host" v-model:zoom-type="zoomType" v-model:zoom="zoom"
-      worker-src="/js/pdfjs/2.15.349/pdf.worker.min.js" :sources="files" style="flex: 1 1 auto;">
+      worker-src="/js/pdfjs/3.6.172/pdf.worker.min.js" :sources="files" style="flex: 1 1 auto;">
       <template #page="{ page, displaySize }">
         <div>page {{ page.pageNumber }} size = {{ displaySize }}</div>
       </template>

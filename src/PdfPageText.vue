@@ -33,7 +33,7 @@ function renderText() {
   }
 
   renderTask = renderTextLayer({
-    textContent: textContent.value,
+    textContentSource: text,
     container: el,
     viewport: vp,
     // enhanceTextSelection: true

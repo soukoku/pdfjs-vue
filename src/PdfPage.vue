@@ -95,6 +95,12 @@ function renderPage() {
   canvasEl.style.width = Math.floor(pdfVP.width) + 'px'
   canvasEl.style.height = Math.floor(pdfVP.height) + 'px'
 
+  const root = rootEl.value
+  if (root) {
+    root.style.width = canvasEl.style.width
+    root.style.height = canvasEl.style.height
+  }
+
   const context = canvasEl.getContext('2d')
   if (!context || !inViewport.value) return
   if (renderTask) {
@@ -150,19 +156,21 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
 }
+
 .pdf-page-layout {
   position: relative;
   display: flex;
   margin-bottom: 0.5rem;
   margin: auto;
   background: #fff;
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1))
-    drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
 }
+
 .pdf-page-number {
   text-align: center;
   line-height: 1.5;
 }
+
 .pdf-page-overlay {
   position: absolute;
   top: 0;

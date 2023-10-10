@@ -86,14 +86,14 @@ watch(() => props.src, src => {
 // const mediaQuery = matchMedia(`(resolution: 1dppx)`)
 onMounted(() => {
   // mediaQuery.addEventListener("change", updatePixelRatio)
-  observer.value = new IntersectionObserver(debounce((entries: IntersectionObserverEntry[]) => {
+  observer.value = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       const foundComp = pageComps.find(comp => comp?.rootEl === entry.target)
       if (foundComp) {
         foundComp.inViewport = entry.isIntersecting
       }
     })
-  }, 50), {
+  }, {
     // root: rootEl.value,
     rootMargin: '0px'
   })

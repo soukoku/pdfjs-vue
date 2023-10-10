@@ -74,7 +74,7 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
 </script>
 
 <template>
-  <div style="height:100vh;height:100dvh; overflow: hidden; display:flex; flex-direction: column;">
+  <div style="height:100svh; overflow: hidden; display:flex; flex-direction: column;">
 
     <div style="flex:none;">
       <button @click="host.zoomIn">Zoom in</button>
@@ -85,6 +85,7 @@ const files = ['/samples/compressed.tracemonkey-pldi-09.pdf'] //, '/samples/all-
         }}</option>
       </select>
       Sample top toolbar
+      <input type="text">
     </div>
 
     <pdf-host ref="host" v-model:zoom-type="zoomType" v-model:zoom="zoom"

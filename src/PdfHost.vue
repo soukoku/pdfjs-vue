@@ -30,10 +30,10 @@ const props = defineProps<{
    * Hides page number display.
    */
   hideNumber?: boolean,
-  /**
-   * Experimental flag to enable pinch zoom gesture.
-   */
-  enablePinchZoom?: boolean
+  // /**
+  //  * Experimental flag to enable pinch zoom gesture.
+  //  */
+  // enablePinchZoom?: boolean
 }>()
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
@@ -131,66 +131,67 @@ onBeforeUnmount(() => {
 })
 
 // pz = pinch zoom gesture use, logic modified from mdn sample
-const pzEvtCache = [] as PointerEvent[]
-let pzPrevDiff = -1
-function handlePointerDown(e: PointerEvent) {
-  if (!props.enablePinchZoom) return
-  pzEvtCache.push(e)
-}
-const handlePointerMove = debounce((e: PointerEvent) => {// Find this event in the cache and update its record with this event
-  if (!props.enablePinchZoom) return
-  for (let i = 0; i < pzEvtCache.length; i++) {
-    if (e.pointerId === pzEvtCache[i].pointerId) {
-      pzEvtCache[i] = e
-      break
-    }
-  }
-  // console.log('pointer move cache=' + pzEvtCache.length)
-  // If two pointers are down, check for pinch gestures
-  if (pzEvtCache.length === 2) {
-    // Calculate the distance between the two pointers
-    const dx = Math.abs(pzEvtCache[0].clientX - pzEvtCache[1].clientX)
-    const dy = Math.abs(pzEvtCache[0].clientY - pzEvtCache[1].clientY)
-    const curDiff = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
+// const pzEvtCache = [] as PointerEvent[]
+// let pzPrevDiff = -1
+// function handlePointerDown(e: PointerEvent) {
+//   if (!props.enablePinchZoom) return
+//   pzEvtCache.push(e)
+// }
+// const handlePointerMove = debounce((e: PointerEvent) => {// Find this event in the cache and update its record with this event
+//   if (!props.enablePinchZoom) return
+//   for (let i = 0; i < pzEvtCache.length; i++) {
+//     if (e.pointerId === pzEvtCache[i].pointerId) {
+//       pzEvtCache[i] = e
+//       break
+//     }
+//   }
+//   // console.log('pointer move cache=' + pzEvtCache.length)
+//   // If two pointers are down, check for pinch gestures
+//   if (pzEvtCache.length === 2) {
+//     // Calculate the distance between the two pointers
+//     const dx = Math.abs(pzEvtCache[0].clientX - pzEvtCache[1].clientX)
+//     const dy = Math.abs(pzEvtCache[0].clientY - pzEvtCache[1].clientY)
+//     const curDiff = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
 
-    // const delta = Math.abs(curDiff - pzPrevDiff)
-    // console.log('curdiff=' + curDiff + ', prev=' + pzPrevDiff + ', delta=' + delta)
-    if (pzPrevDiff > 0) {
+//     // const delta = Math.abs(curDiff - pzPrevDiff)
+//     // console.log('curdiff=' + curDiff + ', prev=' + pzPrevDiff + ', delta=' + delta)
+//     if (pzPrevDiff > 0) {
 
-      if (curDiff > pzPrevDiff) {
-        // The distance between the two pointers has increased
-        zoomIn()
-      }
-      if (curDiff < pzPrevDiff) {
-        // The distance between the two pointers has decreased
-        zoomOut()
-      }
-    }
+//       if (curDiff > pzPrevDiff) {
+//         // The distance between the two pointers has increased
+//         zoomIn()
+//       }
+//       if (curDiff < pzPrevDiff) {
+//         // The distance between the two pointers has decreased
+//         zoomOut()
+//       }
+//     }
 
-    // Cache the distance for the next move event
-    pzPrevDiff = curDiff
-  }
-}, 10)
+//     // Cache the distance for the next move event
+//     pzPrevDiff = curDiff
+//   }
+// }, 10)
 
-function handlePointerUp(e: PointerEvent) {
-  if (!props.enablePinchZoom) return;
-  // Remove this event from the target's cache
-  for (let i = 0; i < pzEvtCache.length; i++) {
-    if (pzEvtCache[i].pointerId === e.pointerId) {
-      pzEvtCache.splice(i, 1)
-      break
-    }
-  }
-  // If the number of pointers down is less than two then reset diff tracker
-  if (pzEvtCache.length < 2) {
-    pzPrevDiff = -1
-  }
-}
+// function handlePointerUp(e: PointerEvent) {
+//   if (!props.enablePinchZoom) return;
+//   // Remove this event from the target's cache
+//   for (let i = 0; i < pzEvtCache.length; i++) {
+//     if (pzEvtCache[i].pointerId === e.pointerId) {
+//       pzEvtCache.splice(i, 1)
+//       break
+//     }
+//   }
+//   // If the number of pointers down is less than two then reset diff tracker
+//   if (pzEvtCache.length < 2) {
+//     pzPrevDiff = -1
+//   }
+// }
+// @pointerdown="handlePointerDown"
+//     @pointermove="handlePointerMove" @pointerup="handlePointerUp" @pointercancel="handlePointerUp"
+//     @pointerleave="handlePointerUp" @pointerout="handlePointerUp"
 </script>
 <template>
-  <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" @pointerdown="handlePointerDown"
-    @pointermove="handlePointerMove" @pointerup="handlePointerUp" @pointercancel="handlePointerUp"
-    @pointerleave="handlePointerUp" @pointerout="handlePointerUp" tabindex="0" class="pdf-host">
+  <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
     <pdf-document v-for="src in sources" :viewport="viewport" :src="src" :hide-number="!!hideNumber"
       :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)">

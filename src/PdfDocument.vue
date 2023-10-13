@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, shallowRef, onMounted, onBeforeUnmount } from 'vue'
 import { getDocument, PDFDocumentProxy, PDFPageProxy, OnProgressParameters } from 'pdfjs-dist'
-import debounce from 'lodash/debounce'
+// import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
 import { PdfSource, ZoomType } from './types'
 

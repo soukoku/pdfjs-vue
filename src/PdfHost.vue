@@ -3,7 +3,7 @@ import { GlobalWorkerOptions } from 'pdfjs-dist'
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { PdfSource, ZoomType } from './types'
 import PdfDocument from './PdfDocument.vue'
-import debounce from 'lodash/debounce'
+import { useDebounceFn } from '@vueuse/core'
 
 const props = defineProps<{
   /**
@@ -81,7 +81,7 @@ const viewport = ref({ width: 0, height: 0 })
 //   const root = rootEl.value as HTMLDivElement
 //   console.log(`cur scrolls=`, root.scrollLeft, root.scrollTop)
 // }
-const updateViewport = debounce(() => {
+const updateViewport = useDebounceFn(() => {
   const root = rootEl.value
   if (root) {
     viewport.value = {

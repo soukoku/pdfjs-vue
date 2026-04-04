@@ -1,4 +1,3 @@
-import { PDFDataRangeTransport } from 'pdfjs-dist'
 import type {
   TypedArray,
   DocumentInitParameters
@@ -32,6 +31,6 @@ export enum ZoomType {
 export type PdfSource =
   | string
   | URL
-  | PDFDataRangeTransport
   | TypedArray
+  | ArrayBuffer
   | DocumentInitParameters

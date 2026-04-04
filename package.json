@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-vue3",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "Using pdfjs to display PDFs as a vue 3 component.",
   "author": "Eugene Wang",
   "license": "Apache-2.0",
@@ -21,7 +21,7 @@
   ],
   "types": "./types/index.d.ts",
   "main": "./dist/pdfjs-vue3.umd.js",
-	"style": "./dist/style.css",
+  "style": "./dist/style.css",
   "module": "./dist/pdfjs-vue3.es.js",
   "exports": {
     ".": {
@@ -36,18 +36,19 @@
     "preview": "vite preview"
   },
   "peerDependencies": {
-    "pdfjs-dist": "^3.11.174",
-    "vue": "^3.3.4"
+    "pdfjs-dist": "^5.6.205",
+    "vue": "^3.5.32"
   },
   "devDependencies": {
     "@babel/types": "^7.23.0",
-    "@types/lodash": "^4.14.199",
-    "@types/node": "^18.18.5",
-    "@vitejs/plugin-vue": "^4.4.0",
-    "lodash": "^4.17.21",
-    "modern-normalize": "^2.0.0",
-    "typescript": "^5.2.2",
-    "vite": "^4.4.11",
-    "vue-tsc": "^1.8.19"
+    "@types/node": "^25.5.2",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "modern-normalize": "^3.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.3",
+    "vue-tsc": "^3.2.6"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.2.1"
   }
 }

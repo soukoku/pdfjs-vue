@@ -108,13 +108,13 @@ function renderPage() {
     return
   }
 
-  console.debug(`rendering page ${page.pageNumber}`)
+  // console.debug(`rendering page ${page.pageNumber}`)
 
-  const renderContext = {
+  renderTask = page.render({
+    canvas: canvasEl,
     canvasContext: context,
     viewport: displayViewport.value
-  }
-  renderTask = page.render(renderContext)
+  })
   renderTask.promise
     .then(() => renderTask = undefined)
     .catch(() => {

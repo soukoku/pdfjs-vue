@@ -143,8 +143,8 @@ onBeforeUnmount(() => {
     <div class="pdf-page-layout">
       <canvas ref="canvas"></canvas>
       <div class="pdf-page-overlay">
-        <pdf-page-text v-if="!hideText" :viewport="displayViewport" :page="page" />
-        <slot :displaySize="displayViewport"></slot>
+        <pdf-page-text v-if="!hideText" :viewport="pdfViewport" :page="page" />
+        <slot :displaySize="pdfViewport"></slot>
       </div>
     </div>
     <div v-if="!hideNumber" class="pdf-page-number">{{ page.pageNumber }}</div>

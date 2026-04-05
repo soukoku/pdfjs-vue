@@ -4,6 +4,7 @@ import { getDocument, PDFDocumentProxy, PDFPageProxy, OnProgressParameters } fro
 // import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
 import { PdfSource, ZoomType } from './types'
+import { useDevicePixelRatio } from '@vueuse/core'
 
 const props = defineProps<{
   hideText: boolean,
@@ -21,7 +22,7 @@ const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
 }>()
 
-// const pixelRatio = ref(window.devicePixelRatio)
+const { pixelRatio } = useDevicePixelRatio()
 const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
 const observer = shallowRef<IntersectionObserver>()
@@ -35,8 +36,16 @@ function setPageComp(component?: any) {
     pageComps.push(component)
     if (pageComps.length == 1) component.inViewport = true
   }
+
+  console.log('page comps', pageComps.length)
 }
-function cleanupDoc() {
+let loadingTask: ReturnType<typeof getDocument> | undefined
+
+async function cleanupDoc() {
+  if (loadingTask) {
+    await loadingTask.destroy()
+    loadingTask = undefined
+  }
   pdfPages.value.forEach(pg => pg.cleanup())
   pdfPages.value = []
   const doc = pdfDoc.value
@@ -46,22 +55,17 @@ function cleanupDoc() {
   }
   pageComps = []
 }
-// function updatePixelRatio() {
-//   console.debug(`new pixel ratio=${window.devicePixelRatio}`)
-//   pixelRatio.value = window.devicePixelRatio
-// }
 
-
-watch(() => props.src, src => {
-  cleanupDoc()
+watch(() => props.src, async src => {
+  await cleanupDoc()
   if (!src) return
 
-  const task = getDocument(src)
+  loadingTask = getDocument(src)
   isLoading.value = true
-  task.onProgress = (prog: OnProgressParameters) => {
+  loadingTask.onProgress = (prog: OnProgressParameters) => {
     if (prog.total) loadPercent.value = prog.loaded / prog.total
   }
-  task.promise
+  loadingTask.promise
     .then(doc => {
       pdfDoc.value = doc
 
@@ -82,10 +86,7 @@ watch(() => props.src, src => {
     })
 }, { immediate: true })
 
-// listen for dpi change
-// const mediaQuery = matchMedia(`(resolution: 1dppx)`)
 onMounted(() => {
-  // mediaQuery.addEventListener("change", updatePixelRatio)
   observer.value = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       const foundComp = pageComps.find(comp => comp?.rootEl === entry.target)
@@ -99,7 +100,6 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  // mediaQuery.removeEventListener("change", updatePixelRatio)
   cleanupDoc()
   observer.value?.disconnect()
 })
@@ -112,13 +112,13 @@ onBeforeUnmount(() => {
     </slot>
     <pdf-page v-for="page in pdfPages" :ref="setPageComp" :key="page.pageNumber" :page="page" :hide-number="hideNumber"
       :hide-text="hideText" :zoom-type="zoomType" :zoom="zoom" @update:zoom="emits('update:zoom', $event)"
-      :observer="observer" :viewport="viewport">
+      :observer="observer" :viewport="viewport" :device-pixel-ratio="pixelRatio">
       <template #default="{ displaySize }">
         <slot :doc="pdfDoc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-page>
   </div>
-</template> 
+</template>
 <style>
 .pdf-progress {
   text-align: center;

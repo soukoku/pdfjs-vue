@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { PageViewport, PDFPageProxy, TextLayer } from 'pdfjs-dist'
 
 const props = defineProps<{
@@ -36,13 +36,18 @@ async function renderText() {
     viewport: vp,
     // enhanceTextSelection: true
   })
-  await textLayer.render()
+  await textLayer.render().catch(() => { })
 }
 
 onMounted(() => {
   renderText()
 })
-
+onBeforeUnmount(() => {
+  if (textLayer) {
+    textLayer.cancel()
+    textLayer = undefined
+  }
+})
 </script>
 <template>
   <div ref="rootEl" class="pdf-text-layer"></div>

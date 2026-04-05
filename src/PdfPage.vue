@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch, ref, computed, onBeforeUnmount } from 'vue'
-import { PDFPageProxy, RenderTask } from 'pdfjs-dist'
+import { PDFPageProxy, RenderingCancelledException, RenderTask } from 'pdfjs-dist'
 import PdfPageText from './PdfPageText.vue'
 import { ZoomType } from './types'
 
@@ -14,7 +14,8 @@ const props = defineProps<{
     height: number
   },
   page: PDFPageProxy,
-  observer: IntersectionObserver | undefined
+  observer: IntersectionObserver | undefined,
+  devicePixelRatio: number
 }>()
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
@@ -60,7 +61,7 @@ const pdfScale = computed(() => {
   return baseScale * props.zoom
 })
 const displayScale = computed(() => {
-  return pdfScale.value * (window?.devicePixelRatio || 1)
+  return pdfScale.value * (props.devicePixelRatio || 1)
 })
 const pdfViewport = computed(() => {
   return props.page.getViewport({ scale: pdfScale.value })
@@ -117,9 +118,11 @@ function renderPage() {
   })
   renderTask.promise
     .then(() => renderTask = undefined)
-    .catch(() => {
+    .catch(err => {
       renderTask = undefined
-      renderPage()
+      if (err instanceof RenderingCancelledException) {
+        renderPage()
+      }
     })
 }
 

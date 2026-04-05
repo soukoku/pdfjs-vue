@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, shallowRef, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, shallowRef, onBeforeUnmount } from 'vue'
 import { getDocument, PDFDocumentProxy, PDFPageProxy, OnProgressParameters } from 'pdfjs-dist'
 // import debounce from 'lodash/debounce'
 import PdfPage from './PdfPage.vue'
@@ -25,20 +25,9 @@ const emits = defineEmits<{
 const { pixelRatio } = useDevicePixelRatio()
 const pdfDoc = shallowRef<PDFDocumentProxy>()
 const pdfPages = shallowRef<PDFPageProxy[]>([])
-const observer = shallowRef<IntersectionObserver>()
 const rootEl = ref()
-let pageComps = [] as any[]
 const isLoading = ref(false)
 const loadPercent = ref(0)
-
-function setPageComp(component?: any) {
-  if (!!component) {
-    pageComps.push(component)
-    if (pageComps.length == 1) component.inViewport = true
-  }
-
-  console.log('page comps', pageComps.length)
-}
 let loadingTask: ReturnType<typeof getDocument> | undefined
 
 async function cleanupDoc() {
@@ -53,7 +42,6 @@ async function cleanupDoc() {
     doc.destroy()
     pdfDoc.value = undefined
   }
-  pageComps = []
 }
 
 watch(() => props.src, async src => {
@@ -86,22 +74,8 @@ watch(() => props.src, async src => {
     })
 }, { immediate: true })
 
-onMounted(() => {
-  observer.value = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
-    entries.forEach(entry => {
-      const foundComp = pageComps.find(comp => comp?.rootEl === entry.target)
-      if (foundComp) {
-        foundComp.inViewport = entry.isIntersecting
-      }
-    })
-  }, {
-    // root: rootEl.value,
-    rootMargin: '0px'
-  })
-})
 onBeforeUnmount(() => {
   cleanupDoc()
-  observer.value?.disconnect()
 })
 </script>
 
@@ -110,9 +84,9 @@ onBeforeUnmount(() => {
     <slot name="loading" :src="props.src" :loading="isLoading" :progress="loadPercent">
       <p class="pdf-progress" v-if="isLoading">loading {{ Math.ceil(100 * loadPercent) }}%</p>
     </slot>
-    <pdf-page v-for="page in pdfPages" :ref="setPageComp" :key="page.pageNumber" :page="page" :hide-number="hideNumber"
+    <pdf-page v-for="page in pdfPages" :key="page.pageNumber" :page="page" :hide-number="hideNumber"
       :hide-text="hideText" :zoom-type="zoomType" :zoom="zoom" @update:zoom="emits('update:zoom', $event)"
-      :observer="observer" :viewport="viewport" :device-pixel-ratio="pixelRatio">
+      :viewport="viewport" :device-pixel-ratio="pixelRatio">
       <template #default="{ displaySize }">
         <slot :doc="pdfDoc" :page="page" :displaySize="displaySize"></slot>
       </template>

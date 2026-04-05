@@ -14,7 +14,6 @@ const props = defineProps<{
     height: number
   },
   page: PDFPageProxy,
-  observer: IntersectionObserver | undefined,
   devicePixelRatio: number
 }>()
 const emits = defineEmits<{
@@ -24,8 +23,7 @@ const canvas = ref<HTMLCanvasElement>()
 const rootEl = ref<HTMLDivElement>()
 const inViewport = ref(false)
 const maxAutoWidth = 1100
-
-defineExpose({ rootEl, inViewport })
+let observer: IntersectionObserver | undefined
 
 // convert pdf dpi (72) to base screen dpi (96)
 const baseScale = 96 / 72
@@ -109,7 +107,7 @@ function renderPage() {
     return
   }
 
-  // console.debug(`rendering page ${page.pageNumber}`)
+  console.debug(`rendering page ${page.pageNumber} with zoom ${props.zoom} (scale ${pdfScale.value})`)
 
   renderTask = page.render({
     canvas: canvasEl,
@@ -131,13 +129,25 @@ watch(() => [props.page, displayScale.value, inViewport.value], () => {
 }, { immediate: true })
 
 onMounted(() => {
+  const el = rootEl.value
+  if (el) {
+    observer = new IntersectionObserver(
+      ([entry]) => {
+        inViewport.value = entry.isIntersecting
+      },
+      { rootMargin: '200px 0px' }
+    )
+    observer.observe(el)
+  }
   renderPage()
-  if (rootEl.value)
-    props.observer?.observe(rootEl.value)
 })
 onBeforeUnmount(() => {
-  if (rootEl.value)
-    props.observer?.unobserve(rootEl.value)
+  observer?.disconnect()
+  observer = undefined
+  if (renderTask) {
+    renderTask.cancel()
+    renderTask = undefined
+  }
 })
 
 </script>

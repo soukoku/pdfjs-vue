@@ -42,6 +42,7 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: 'update:zoom', zoom: number): void
   (e: 'update:zoomType', zoomType: ZoomType): void
+  (e: 'error', payload: { source: PdfSource, error: unknown }): void
 }>()
 const rootEl = ref()
 
@@ -136,6 +137,9 @@ function zoomOut() {
   emits('update:zoom', Math.max(proposed, .25))
   emits('update:zoomType', ZoomType.Custom)
 }
+function emitSourceError(source: PdfSource, error: unknown) {
+  emits('error', { source, error })
+}
 watch(() => props.zoom, (newZoom, oldZoom) => {
   const root = rootEl.value as HTMLDivElement
   if (root && newZoom && oldZoom) {
@@ -225,7 +229,7 @@ onBeforeUnmount(() => {
     <pdf-document v-for="entry in sourceEntries" :key="entry.key" :viewport="viewport" :src="entry.source"
       :hide-number="!!hideNumber"
       :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
-      @update:zoom="emits('update:zoom', $event)">
+      @update:zoom="emits('update:zoom', $event)" @error="emitSourceError(entry.source, $event)">
       <template #loading="{ loading, progress }">
         <slot name="loading" :source="entry.source" :loading="loading" :progress="progress"></slot>
       </template>

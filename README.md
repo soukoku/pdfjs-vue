@@ -74,6 +74,14 @@ const files = ['/samples/my-document.pdf']
 | `hideText` | `boolean` | `false` | Hides the selectable text layer. |
 | `hideNumber` | `boolean` | `false` | Hides the page number display. |
 
+### PdfHost Events
+
+| Event | Payload | Description |
+|------|---------|-------------|
+| `update:zoom` | `number` | Emitted when zoom changes. |
+| `update:zoomType` | `ZoomType` | Emitted when zoom mode changes. |
+| `error` | `{ source: PdfSource, error: unknown }` | Emitted when loading a source fails. |
+
 ### ZoomType Enum
 
 | Value | Description |

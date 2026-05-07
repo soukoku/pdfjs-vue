@@ -7,7 +7,7 @@
   "homepage": "https://github.com/soukoku/pdfjs-vue",
   "repository": {
     "type": "git",
-    "url": "https://github.com/soukoku/pdfjs-vue.git"
+    "url": "git+https://github.com/soukoku/pdfjs-vue.git"
   },
   "bugs": {
     "url": "https://github.com/soukoku/pdfjs-vue/issues"

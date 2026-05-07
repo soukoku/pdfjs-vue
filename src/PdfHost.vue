@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GlobalWorkerOptions } from 'pdfjs-dist'
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { PdfSource, ZoomType } from './types'
 import PdfDocument from './PdfDocument.vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -14,6 +14,10 @@ const props = defineProps<{
    * Array of pdf sources to display.
    */
   sources: PdfSource[],
+  /**
+   * Optional key generator used by v-for for source identity.
+   */
+  sourceKey?: (source: PdfSource, index: number) => string | number,
   /**
    * Type of zoom used. Defaults to Auto.
    */
@@ -76,6 +80,32 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 const viewport = ref({ width: 0, height: 0 })
+const objectSourceIds = new WeakMap<object, number>()
+let nextObjectSourceId = 1
+
+function getFallbackSourceKey(source: PdfSource, index: number): string {
+  if (typeof source === 'string') return `str:${source}:${index}`
+  if (source instanceof URL) return `url:${source.href}:${index}`
+
+  if (source && typeof source === 'object') {
+    const obj = source as object
+    const hit = objectSourceIds.get(obj)
+    if (hit) return `obj:${hit}:${index}`
+
+    const newId = nextObjectSourceId++
+    objectSourceIds.set(obj, newId)
+    return `obj:${newId}:${index}`
+  }
+
+  return `src:${index}`
+}
+
+const sourceEntries = computed(() => {
+  return props.sources.map((source, index) => ({
+    source,
+    key: props.sourceKey ? props.sourceKey(source, index) : getFallbackSourceKey(source, index)
+  }))
+})
 
 // function printScroll() {
 //   const root = rootEl.value as HTMLDivElement
@@ -192,14 +222,15 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div ref="rootEl" @wheel="onMouseWheel" @keydown="onKeydown" tabindex="0" class="pdf-host">
-    <pdf-document v-for="src in sources" :viewport="viewport" :src="src" :hide-number="!!hideNumber"
+    <pdf-document v-for="entry in sourceEntries" :key="entry.key" :viewport="viewport" :src="entry.source"
+      :hide-number="!!hideNumber"
       :hide-text="!!hideText" :zoom-type="zoomType || ZoomType.Auto" :zoom="zoom || 1"
       @update:zoom="emits('update:zoom', $event)">
       <template #loading="{ loading, progress }">
-        <slot name="loading" :source="src" :loading="loading" :progress="progress"></slot>
+        <slot name="loading" :source="entry.source" :loading="loading" :progress="progress"></slot>
       </template>
       <template #default="{ doc, page, displaySize }">
-        <slot name="page" :source="src" :doc="doc" :page="page" :displaySize="displaySize"></slot>
+        <slot name="page" :source="entry.source" :doc="doc" :page="page" :displaySize="displaySize"></slot>
       </template>
     </pdf-document>
     <slot></slot>

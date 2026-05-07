@@ -68,6 +68,7 @@ const files = ['/samples/my-document.pdf']
 |------|------|---------|-------------|
 | `workerSrc` | `string` | — | URL to the pdfjs worker script. Must be set if not configured elsewhere. |
 | `sources` | `PdfSource[]` | — | Array of PDF sources to display. Each source can be a URL string, `URL`, `TypedArray`, `ArrayBuffer`, or a pdfjs `DocumentInitParameters` object. |
+| `sourceKey` | `(source: PdfSource, index: number) => string \| number` | — | Optional key generator for source identity in rendering. Use this when sources may contain duplicate values. |
 | `zoomType` | `ZoomType` | `ZoomType.Auto` | Type of zoom behavior. |
 | `zoom` | `number` | `1` | Custom zoom percentage (1 = 100%). Used when `zoomType` is `Custom`. |
 | `hideText` | `boolean` | `false` | Hides the selectable text layer. |
